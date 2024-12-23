@@ -162,7 +162,7 @@ const Register = () => {
         <div className="mb-8 text-center">
           <h2 className="text-5xl font-bold">SIGN UP</h2>
         </div>
-        <div className="mb-6 flex sm:flex-row justify-center">
+        {/* <div className="mb-6 flex sm:flex-row justify-center">
           <img
             className="rounded-full"
             src={
@@ -173,10 +173,10 @@ const Register = () => {
             alt="avatar"
             style={{ width: "120px", height: "120px" }}
           />
-        </div>
+        </div> */}
         <div>
           <form onSubmit={handleSubmit}>
-            <div className="mb-6 flex flex-row justify-center items-center text-center">
+            {/* <div className="mb-6 flex flex-row justify-center items-center text-center">
               <label htmlFor="file">
                 click here to add a profile picture :{" "}
                 <DriveFolderUploadOutlinedIcon />
@@ -196,7 +196,7 @@ const Register = () => {
                   setFile(file);
                 }}
               />
-            </div>
+            </div> */}
             <div className="mb-6">
               <input
                 placeholder="Name"
@@ -246,11 +246,11 @@ const Register = () => {
                   className="block text-base bordder-[#E9EDF4] border appearance-none w-full py-3 px-5   bg-[#FCFDFE] rounded-3xl  border-slate-300 focus:outline-none focus:ring"
                 >
                   <option value="traveler">Traveler</option>
-                  <option value="hotelOwner">Hotel Owner</option>
-                  <option value="vehicleOwner">Vehicle Owner</option>
+                  <option value="admin">Admin</option>
+                  {/* <option value="vehicleOwner">Vehicle Owner</option>
                   <option value="resturentOwner">Resturent Owner</option>
                   <option value="tourGuide">Tour Guide</option>
-                  <option value="eventOrganizer">Event Organizer</option>
+                  <option value="eventOrganizer">Event Organizer</option> */}
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                   <svg

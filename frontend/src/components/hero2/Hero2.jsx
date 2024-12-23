@@ -12,8 +12,7 @@ const Hero2 = () => {
               Nepal
             </h1>
             <p class="mt-4">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Explore the breathtaking wonders of Nepal, from the majestic Himalayas to the rich cultural heritage of Kathmandu. Experience adventure, spirituality, and natural beauty in a land that offers unforgettable journeys for every traveler.
             </p>
             <button className="bg-black text-white px-2 py-3 rounded-lg hover:bg-white hover:border hover:text-black hover:font-bold mt-4">
               Get started

@@ -42,8 +42,7 @@ const Services = () => {
                   What We Offer
                 </h2>
                 <p class="text-body-color text-base">
-                  Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                  Quaerat reprehenderit autem ea ab repellat eum, quasi modi,
+                We offer a comprehensive array of services including Hotel Reservations, Tour Package Reservations, Vehicle Reservations, Restaurant Reservations, and Event Reservations.
                 </p>
               </div>
             </div>

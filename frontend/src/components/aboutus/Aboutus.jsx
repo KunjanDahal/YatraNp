@@ -41,17 +41,13 @@ const Aboutus = () => {
                   Why Choose Us
                 </span>
                 <h2 className="text-dark mb-8 text-3xl font-bold sm:text-4xl">
-                  Lorem ipsum dolor sit amet
+                  YatraNp
                 </h2>
                 <p className="text-body-color mb-8 text-base">
-                  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Esse
-                  nulla enim aperiam culpa cupiditate quas animi ducimus
-                  blanditiis! Dolorum, perspiciatis.
+                At YatraNp, we specialize in creating personalized experiences that are as unique as Nepal itself. Our deep local knowledge and network ensure that you have an authentic journey filled with hidden gems and exclusive encounters. 
                 </p>
                 <p className="text-body-color mb-12 text-base">
-                  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Esse
-                  nulla enim aperiam culpa cupiditate quas animi ducimus
-                  blanditiis! Dolorum, perspiciatis.
+                With us, your adventure is not just about visiting new places; it's about connecting with new cultures, nature, and discovering your own spirit of adventure.
                 </p>
               </div>
             </div>

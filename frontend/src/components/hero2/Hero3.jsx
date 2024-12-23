@@ -9,20 +9,16 @@ const Hero3 = () => {
             <div className="w-full px-4 lg:w-1/2 xl:w-5/12">
               <div className="mt-10 lg:mt-0">
                 <span className="text-[#41A4FF] mb-2 block text-lg font-semibold">
-                  Trvel with us
+                  Travel with us
                 </span>
                 <h2 className="text-dark mb-8 text-3xl font-bold sm:text-4xl">
                   TAKE ONLY MEMORIES, LEAVE ONLY FOOTPRINTS
                 </h2>
                 <p className="text-body-color mb-8 text-base">
-                  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Esse
-                  nulla enim aperiam culpa cupiditate quas animi ducimus
-                  blanditiis! Dolorum, perspiciatis.
+                Journey with us and embrace the extraordinary as we guide you through Nepal’s stunning landscapes and vibrant cultures. Experience the warmth of local hospitality and enrich your life with unforgettable adventures. 
                 </p>
                 <p className="text-body-color mb-12 text-base">
-                  Lorem ipsum dolor sit amet, consectetur adipisicing elit. Esse
-                  nulla enim aperiam culpa cupiditate quas animi ducimus
-                  blanditiis! Dolorum, perspiciatis.
+                Every step with us is a stride towards sustainability and respect for the vibrant communities and pristine environments we visit.
                 </p>
               </div>
             </div>
