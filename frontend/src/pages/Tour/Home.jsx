@@ -50,12 +50,11 @@ const Home = () => {
       {/* Navigated menu end*/}
 
       {/* Navigation Tour bar */}
-      <TourNav />
 
       {/* Categories */}
       <div className="mx-auto max-w-2xl px-4  sm:px-6  lg:max-w-7xl lg:px-8">
         {/* welcome image */}
-        <img src={welcome} alt="" />
+        <img src={""} alt="" />
         <h1 className="text-4xl mt-10 mb-10 ml-2">Tour Categories</h1>
         <TourCategories />
       </div>

@@ -12,10 +12,7 @@ const Footer = () => {
       <div className="">
         <h3 className="text-2xl font-bold text-[#41A4FF]">YatraNp</h3>
         <p className="py-4">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. A odio non
-          nemo veniam, natus accusantium. Praesentium, doloribus mollitia
-          dignissimos similique optio
-        </p>
+        YatraNp is an online travel platform dedicated to simplifying travel experiences in Nepal. Designed to cater specifically to the needs of both domestic and international tourists, the service offers a comprehensive range of travel-related solutions, including booking accommodations, arranging transportation, and organizing guided tours across various destinations in Nepal.        </p>
         <div className="flex justify-start gap-10 md:w-[75%] my-6">
           <FaWhatsappSquare size={30} />
           <FaFacebookSquare size={30} />

@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
 import backgroundImage from "../assets/images/bg.jpg";
 import Spinner from "../components/spinner/LoadingSpinner";
+import { GoogleLogin } from 'react-google-login'; // Import Google Login
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
@@ -29,9 +30,7 @@ const Login = () => {
 
     if (!credentials.email || !credentials.password) {
       Swal.fire("Please enter your email and password", "", "error");
-    }
-    if (!/\S+@\S+\.\S+/.test(credentials.email)) {
-      Swal.fire("Please enter a valid email address", "", "error");
+      return; // Add return to stop execution if validation fails
     }
     try {
       setLoading2(true);
@@ -51,6 +50,11 @@ const Login = () => {
         Swal.fire(err.response.data, "", "error");
       }, 2000);
     }
+  };
+
+  const responseGoogle = (response) => {
+    console.log(response);
+    // Implement your logic to handle successful Google authentication here
   };
 
   return (
@@ -78,28 +82,46 @@ const Login = () => {
                       id="email"
                       name="email"
                       onChange={handleChange}
-                      className="bordder-[#E9EDF4] w-full rounded-3xl focus:ring border bg-[#FCFDFE] py-3 px-5 text-base text-body-color placeholder-[#ACB6BE] outline-none focus:border-[#41A4FF] focus-visible:shadow-none"
+                      className="border-[#E9EDF4] w-full rounded-3xl focus:ring border bg-[#FCFDFE] py-3 px-5 text-base text-body-color placeholder-[#ACB6BE] outline-none focus:border-[#41A4FF] focus-visible:shadow-none"
                     />
                   </div>
-                  <div className="mb-9">
+                  <div className="mb-6">
                     <input
                       type="password"
                       placeholder="Password"
                       id="password"
                       name="password"
                       onChange={handleChange}
-                      className="bordder-[#E9EDF4] w-full rounded-3xl border focus:ring bg-[#FCFDFE] py-3 px-5 text-base text-body-color placeholder-[#ACB6BE] outline-none focus:border-[#41A4FF] focus-visible:shadow-none"
+                      className="border-[#E9EDF4] w-full rounded-3xl border focus:ring bg-[#FCFDFE] py-3 px-5 text-base text-body-color placeholder-[#ACB6BE] outline-none focus:border-[#41A4FF] focus-visible:shadow-none"
                     />
                   </div>
-                  <div className="mb-10">
+                  <div className="mb-6">
                     <button
                       disabled={loading}
                       onClick={handleClick}
-                      className="w-full cursor-pointer rounded-3xl font-bold bg-[#41A4FF] text-center hover:bg-gray-600 py-3 px-5 text-white transition hover:bg-opacity-90"
+                      className="w-full cursor-pointer rounded-3xl font-bold bg-[#41A4FF] py-3 px-5 text-white transition hover:bg-opacity-90"
                     >
                       Sign In
                     </button>
                   </div>
+                  <div className="mb-4">
+  <GoogleLogin
+    clientId="YOUR_CLIENT_ID.apps.googleusercontent.com"
+    onSuccess={responseGoogle}
+    onFailure={responseGoogle}
+    cookiePolicy={'single_host_origin'}
+    render={renderProps => (
+      <button
+        onClick={renderProps.onClick}
+        disabled={renderProps.disabled}
+        className="w-full cursor-pointer rounded-3xl font-bold bg-[#41A4FF] py-3 px-5 text-white transition hover:bg-opacity-90"
+      >
+        Login with Google
+      </button>
+    )}
+  />
+</div>
+
                 </form>
                 {loading && <Spinner />}
 

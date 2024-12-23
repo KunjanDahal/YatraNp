@@ -26,7 +26,7 @@ const HeroTour = () => {
                   fontWeight: "bolder",
                 }}
               >
-                Do More With Travely
+                Do More With YatraNp
               </h2>
               <div>
                 <div className="mt-12 w-1/2 mr-auto ml-auto">
@@ -39,7 +39,6 @@ const HeroTour = () => {
                       textShadow: "3px 1px black",
                     }}
                   >
-                    an island awaits you <br />
                     Discover Nepal
                   </h4>
                 </div>

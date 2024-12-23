@@ -43,7 +43,7 @@ const HiddenPlaces = () => {
     // </div>
     <div class="mx-auto max-w-2xl px-4 pb-16 sm:px-6 lg:max-w-7xl lg:px-8 mt-10">
       <p class="uppercase text-5xl">
-        get a brief about Hidden beauties in srilanka
+        Get a brief about Hidden beauties in Nepal
       </p>
       {/* <!-- first --> */}
       <div class="grid grid-cols-1 md:grid-cols-2 mt-10 gap-5">
@@ -52,14 +52,9 @@ const HiddenPlaces = () => {
           alt=""
         ></img>
         <div class="text-xl">
-          <p className="font-extrabold text-2xl mb-3">Sembuwaththa Lake</p>
+          <p className="font-extrabold text-2xl mb-3">Phewa Lake</p>
           <p>
-            Sembuwatta Lake is a stunning man-made lake located in the hill
-            country of Nepal, near the town of Elkaduwa in the Matale
-            District. The lake is situated around 1,150 meters above sea level
-            and is surrounded by lush green hills covered with tea plantations,
-            eucalyptus trees, and dense forest. The Sembuwatta Lake was created
-            by building a dam across the Sembuwatta River, which flows through a
+          Phewa Lake, also known as Phewa Tal, is a stunning freshwater lake nestled in the heart of Pokhara, Nepal, offering breathtaking views of the Annapurna mountain range. As the second largest lake in Nepal, it spans approximately 4.43 square kilometers and serves as a central attraction for both locals and tourists. The lake is renowned for its calm waters and the beautifully reflected image of Machhapuchhre and other mountain peaks on its surface on clear days.
             {/* deep gorge. The lake covers an area of approximately 9.2 hectares
             and has a maximum depth of around 18 meters. The water in the lake
             is crystal clear and has a bluish-green tint, which makes it a
@@ -89,14 +84,13 @@ const HiddenPlaces = () => {
           ></img>
         </div>
         <div class="text-xl">
-          <p className="font-extrabold text-2xl mb-3">Hulangala</p>
+          <p className="font-extrabold text-2xl mb-3">Mustang</p>
           <p>
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Sunt
-            fugiat cupiditate quas vitae, ducimus saepe quos voluptatibus,
-            accusantium qui voluptates earum voluptatum. Consequuntur alias
-            beatae laborum neque quisquam, quae sit, inventore maxime sed
-            eligendi aliquid a cum voluptatum nostrum deleniti cumque minima ab
-            ullam impedit eveniet nulla sequi quis odit?
+          Mustang, often referred to as the "Forbidden Kingdom," is a remote and ancient region in the north-central part of Nepal that borders Tibet. This area is celebrated for its rugged landscapes, Tibetan culture, and archaeological treasures. Mustang comprises two distinct regions: the Lower Mustang which is more accessible and visited for its beautiful apple orchards and historic monasteries, and the Upper Mustang, known for its arid, moonlike landscapes and preserved Tibetan heritage.
+
+Upper Mustang, with its capital Lo Manthang, a walled city, is particularly famous for its well-preserved medieval Buddhist arts, vibrant prayer flags, and mysterious cave complexes, some of which are thousands of years old. The area was restricted to outsiders until 1992, preserving a way of life almost unchanged for centuries.
+
+
           </p>
         </div>
       </div>

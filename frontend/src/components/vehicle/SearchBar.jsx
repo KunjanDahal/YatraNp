@@ -62,16 +62,16 @@ useEffect(() => {
 
           <div className='flex flex-col pl-16'>
             <label for = 'pickupLocation' className='py-3'>Pick-up Location</label>
-            <input type='text' list='city' className='border rounded-md  p-3 lg:w-[300px] w-full' placeholder='Colombo' value={pickupLocation} onChange={(e) => setPickupLocation(e.target.value) }></input>
+            <input type='text' list='city' className='border rounded-md  p-3 lg:w-[300px] w-full' placeholder='Kathmandu' value={pickupLocation} onChange={(e) => setPickupLocation(e.target.value) }></input>
 
             <datalist id='city'>
-              <option value='Colombo'/>
-              <option value = 'Galle'/>
-              <option value = 'Matara'/>
-              <option value = 'Mount Lavinia'/>
-              <option value = 'Kandy'/>
-              <option value = 'Katunayake Airport'/>
-              <option value = 'Negombo'/>
+              <option value='Kathmandu'/>
+              <option value = 'Pokhara'/>
+              <option value = 'Chitwan'/>
+              <option value = 'Biratnagar'/>
+              <option value = 'Butwal'/>
+              <option value = ' Bhadrapur'/>
+              <option value = 'Other place'/>
 
             </datalist>
           </div>
