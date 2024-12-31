@@ -12,7 +12,9 @@ const Login = () => {
     email: undefined,
     password: undefined,
   });
-
+  const loginWithGoogle = () => {
+    window.location.href = 'http://localhost:5000/auth/google';
+  };
   const [loading2, setLoading2] = useState(false);
 
   const { loading, error, dispatch } = useContext(AuthContext);
@@ -99,6 +101,19 @@ const Login = () => {
                     >
                       Sign In
                     </button>
+     <br />
+     <br />
+     <br />
+     <br />
+
+     <button 
+  onClick={loginWithGoogle}
+  className="w-full cursor-pointer rounded-3xl font-bold bg-[#41A4FF] text-center hover:bg-gray-600 py-3 px-5 text-white transition hover:bg-opacity-90"
+>
+  Login with Google
+</button>
+
+
                   </div>
                 </form>
                 {loading && <Spinner />}
