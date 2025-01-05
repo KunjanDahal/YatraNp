@@ -88,3 +88,7 @@ const io = require("socket.io")(server, {
 io.on("connection", (socket) => {
   console.log("Connected to socket.io".cyan.bold);
 });
+
+//tour
+const tourRouter = require("./routes/tourRouter");
+app.use("/api/tours", tourRouter);

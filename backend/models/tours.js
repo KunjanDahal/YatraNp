@@ -6,10 +6,7 @@ const addTourForm = new Schema({
     type: String,
     required: [true, "Must be login first"],
   },
-  img: {
-    type: String,
-    required: [true, "must provide a photo"],
-  },
+
   name: {
     type: String,
     required: [true, "must provide a name "],
