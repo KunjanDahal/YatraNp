@@ -10,7 +10,7 @@ const Register = () => {
   const [loading2, setLoading2] = useState(false);
 
   const [file, setFile] = useState("");
-
+  const [isAdmin,setIsAdmin] = useState(false)
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
@@ -20,6 +20,13 @@ const Register = () => {
   const [repeatPassword, setRepeatPassword] = useState("");
 
   const navigate = useNavigate();
+
+  const handleTypeChange = (e) => {
+    const selectedType = e.target.value;
+    setType(selectedType);
+    setIsAdmin(selectedType === "admin"); // Set isAdmin true when type is admin
+  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,6 +110,7 @@ const Register = () => {
           type,
           password,
           img: url,
+          isAdmin :type == "admin"
         });
 
         Swal.fire(
@@ -119,6 +127,7 @@ const Register = () => {
           country,
           type,
           password,
+          isAdmin :type == "admin"
         });
 
         Swal.fire(
@@ -247,10 +256,7 @@ const Register = () => {
                 >
                   <option value="traveler">Traveler</option>
                   <option value="admin">Admin</option>
-                  {/* <option value="vehicleOwner">Vehicle Owner</option>
-                  <option value="resturentOwner">Resturent Owner</option>
-                  <option value="tourGuide">Tour Guide</option>
-                  <option value="eventOrganizer">Event Organizer</option> */}
+                
                 </select>
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                   <svg
