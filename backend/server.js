@@ -1,12 +1,14 @@
 const express = require("express");
-const dotenv = require("dotenv").config();
+const dotenv = require('dotenv').config();
 const path = require("path");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const colors = require("colors");
+const cookieSession = require('cookie-session');
 const session = require("express-session");
 const passport = require("passport");
 const cors = require("cors");
+require('./config/passport'); 
 const connectDB = require("./config/db");
 
 // Import Routes
@@ -15,6 +17,8 @@ const authRoutes = require("./routes/authRoutes");
 
 // Initialize Express app
 const app = express();
+
+
 
 // Database Connection
 connectDB();
@@ -29,38 +33,25 @@ app.use(cors());
 // Middleware for parsing cookies
 app.use(cookieParser());
 
-// Passport.js configuration
-require('./config/passport');
 
-// Session Middleware (Required before Passport.js initialization)
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-session-secret',
+  secret: process.env.SESSION_SECRET || 'your_session_secret',
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-  },
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
 }));
 
-// Initialize Passport.js
 app.use(passport.initialize());
 app.use(passport.session());
-
-// Google Authentication Routes
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-app.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login' }),
-  (req, res) => {
-    res.redirect('http://localhost:3000/'); // Redirect to frontend after successful login
-  }
-);
 
 
 // Static file serving for images
 app.use("/api/vehicle/images", express.static(path.join(__dirname, "images")));
 app.use("/api/hotels/images", express.static(path.join(__dirname, "images")));
+
 
 // API Routes
 app.use("/api/auth", authRoutes);

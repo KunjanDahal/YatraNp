@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useContext, useState } from "react";
+import { useContext, useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/authContext";
 import { Link } from "react-router-dom";
@@ -12,18 +12,19 @@ const Login = () => {
     email: undefined,
     password: undefined,
   });
-  const loginWithGoogle = () => {
-    window.location.href = 'http://localhost:5000/auth/google';
-  };
   const [loading2, setLoading2] = useState(false);
-
   const { loading, error, dispatch } = useContext(AuthContext);
-
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setCredentials((prev) => ({ ...prev, [e.target.id]: e.target.value }));
   };
+
+  const handleGoogleLogin = (e) => {
+    e?.preventDefault();
+    window.location.href = 'http://localhost:5000/api/auth/google';
+  };
+
 
   const handleClick = async (e) => {
     e.preventDefault();
@@ -31,6 +32,7 @@ const Login = () => {
 
     if (!credentials.email || !credentials.password) {
       Swal.fire("Please enter your email and password", "", "error");
+      return
     }
     if (!/\S+@\S+\.\S+/.test(credentials.email)) {
       Swal.fire("Please enter a valid email address", "", "error");
@@ -106,12 +108,17 @@ const Login = () => {
      <br />
      <br />
 
-     <button 
-  onClick={loginWithGoogle}
-  className="w-full cursor-pointer rounded-3xl font-bold bg-[#41A4FF] text-center hover:bg-gray-600 py-3 px-5 text-white transition hover:bg-opacity-90"
+     <div className="login-container">
+       
+        
+        <button 
+  onClick={handleGoogleLogin}
+  type="button" 
+  className="w-full mt-4 cursor-pointer rounded-3xl border-none bg-[#4285f4] py-3 px-5 text-white transition hover:bg-opacity-90"
 >
-  Login with Google
+  Sign in with Google
 </button>
+    </div>
 
 
                   </div>
