@@ -29,7 +29,7 @@ export const HotelHome = () => {
       <h1 className="ml-10 mt-5  md:text-2xl  font-bold   text-[#272727]">
         Hotels guests love
       </h1>
-x      
+   <HotelCard/>
     </div>
   );
 };

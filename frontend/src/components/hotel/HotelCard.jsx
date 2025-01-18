@@ -8,6 +8,7 @@ const HotelCard = () => {
     return <div className="text-center">Loading...</div>; // Loading indicator
   }
 
+
   if (error) {
     return <div className="text-center text-red-500">Error: {error.message}</div>; // Error handling
   }
@@ -21,12 +22,11 @@ const HotelCard = () => {
             key={item._id} // Assuming you are using _id as the unique key
           >
             <img
-              src={item.HotelImg} // Updated to use the HotelImg field from the API
-              alt={`Image of ${item.name}`} // Improved alt text for accessibility
+              src={`http://localhost:5000/api/hotels/images/${item.HotelImg}`} // Add backend URL prefix  alt={`Image of ${item.name}`} // Improved alt text for accessibility
               className="w-full object-cover h-64"
               onError={(e) => {
-                e.target.onerror = null; 
-                e.target.src = 'path/to/your/fallback/image.jpg'; // Fallback image if HotelImg fails
+                e.target.onerror = null;
+                e.target.src = 'logo512.png'; // Fallback image if HotelImg fails
               }}
             />
             <div className="p-4">

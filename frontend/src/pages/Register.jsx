@@ -24,7 +24,7 @@ const Register = () => {
   const handleTypeChange = (e) => {
     const selectedType = e.target.value;
     setType(selectedType);
-    setIsAdmin(selectedType === "admin"); // Set isAdmin true when type is admin
+    setIsAdmin(selectedType === "admin"); 
   };
 
 

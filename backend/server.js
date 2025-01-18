@@ -83,3 +83,8 @@ io.on("connection", (socket) => {
 //tour
 const tourRouter = require("./routes/tourRouter");
 app.use("/api/tours", tourRouter);
+
+//hotel
+const hotels = require('./routes/hotels');
+app.use('/api/hotels', hotels);
+
