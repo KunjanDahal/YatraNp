@@ -10,6 +10,7 @@ const passport = require("passport");
 const cors = require("cors");
 require('./config/passport'); 
 const connectDB = require("./config/db");
+const { createImagesDirectory } = require('./config/init');
 
 // Import Routes
 const userRoutes = require("./routes/userRoutes");
@@ -18,7 +19,8 @@ const authRoutes = require("./routes/authRoutes");
 // Initialize Express app
 const app = express();
 
-
+// Create necessary directories
+createImagesDirectory();
 
 // Database Connection
 connectDB();
@@ -54,6 +56,7 @@ app.use(passport.session());
 // Static file serving for images
 app.use("/api/vehicle/images", express.static(path.join(__dirname, "images")));
 app.use("/api/hotels/images", express.static(path.join(__dirname, "images")));
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 
 // API Routes
@@ -71,6 +74,10 @@ app.use('/api/hotels', hotels);
 //restaurant
 const restaurants = require('./routes/restaurants');
 app.use('/api/restaurant', restaurants);
+
+//vehicle
+const vehicles = require('./routes/vehicles');
+app.use('/api/vehicle', vehicles);
 
 // Default Route
 app.get("/", (req, res) => {

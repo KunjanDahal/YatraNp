@@ -5,6 +5,9 @@ import Swal from 'sweetalert2'
 import { useContext } from "react";
 import { AuthContext } from "../../context/authContext";
 
+// Configure axios defaults
+axios.defaults.baseURL = "http://localhost:5000";
+
 const AddVehicle = () => {
 
   const countWords = (description) => {
@@ -46,61 +49,58 @@ const AddVehicle = () => {
   function sendData(e){
     e.preventDefault();
 
-
     if (!validateVehicleNumber()) {
       return;
     }
-  
 
-  const formData = new FormData();
+    const formData = new FormData();
 
-  formData.append('ownerName', ownerName);
-  formData.append('brand', brandName);
-  formData.append('model', model);
-  formData.append('vehicleType', vehicleType);
-  formData.append('userId', user._id);
-  formData.append('vehicleNumber', vehicleNumber);
-  formData.append('capacity', numberOfSeats);
-  formData.append('transmissionType', transmissionType);
-  formData.append('fuelType', fuelType);
-  formData.append('price', rentPrice);
-  formData.append('description', description);
+    formData.append('ownerName', ownerName);
+    formData.append('brand', brandName);
+    formData.append('model', model);
+    formData.append('vehicleType', vehicleType);
+    formData.append('userId', user._id);
+    formData.append('vehicleNumber', vehicleNumber);
+    formData.append('capacity', numberOfSeats);
+    formData.append('transmissionType', transmissionType);
+    formData.append('fuelType', fuelType);
+    formData.append('price', rentPrice);
+    formData.append('description', description);
 
-  for(let i = 0; i < insuranceImgs.length; i++){
-    formData.append('insuranceImgs', insuranceImgs[i]);
-  }
+    for(let i = 0; i < insuranceImgs.length; i++){
+      formData.append('insuranceImgs', insuranceImgs[i]);
+    }
 
-  formData.append('vehicleMainImg', vehicleMainImg);
+    formData.append('vehicleMainImg', vehicleMainImg);
 
- 
-  for(let i = 0; i < vehicleImgs.length; i++){
-    formData.append('vehicleImgs', vehicleImgs[i]);
-  }
+    for(let i = 0; i < vehicleImgs.length; i++){
+      formData.append('vehicleImgs', vehicleImgs[i]);
+    }
 
-  formData.append('location', location);
+    formData.append('location', location);
 
-
-  axios
-    .post('/vehicle', formData,{
-    headers : {
-      'Content-Type': 'multipart/form-data',
-    },
-  }).then(() => {
-    Swal.fire({
-      
-      icon: 'success',
-      title: 'Vehicle Added Successfully',
-      showConfirmButton: false,
-      timer: 1500
-    })
-  }).catch((err) => {
-    Swal.fire({
-      icon: 'error',
-      title: 'Oops...',
-      text: 'Something went wrong!',
-      footer: err
-    })
-  });
+    axios
+      .post('/api/vehicle', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      .then(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Vehicle Added Successfully',
+          showConfirmButton: false,
+          timer: 1500
+        })
+      })
+      .catch((err) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Something went wrong!',
+          footer: err.message
+        })
+      });
   }
 
 

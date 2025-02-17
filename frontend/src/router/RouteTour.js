@@ -164,13 +164,22 @@ const RouteTour = () => {
       <Route path="/updateProfile" element={<Profileupdate />} />
       <Route path="/adduser" element={<Adduser />} />
 
-      {/* Yasiru Deshan  */}
+      {/* Vehicle Management Routes */}
       <Route path="/vehicles" element={<VehicleHome />} />
-      <Route path="/vehicle/book/:id" element={<VehicleBook />} />
-      <Route path="/vehicle/payment/" element={<VehiclePayment />} />
+      <Route path="/vehicle" element={<Vehiclelist columns={vehicleColumns} />} />
       <Route path="/vehicle/add" element={<AddVehicle />} />
       <Route path="/vehicle/edit/:id" element={<EditVehicle />} />
-      <Route path="/vehicle/view/" element={<VehicleView />} />
+      <Route path="/vehicle/view" element={<VehicleView />} />
+      <Route path="/vehicle/book/:id" element={<VehicleBook />} />
+      <Route path="/vehicle/payment" element={<VehiclePayment />} />
+      <Route 
+        path="/vehiclereservation" 
+        element={
+          <ProtectedRoute>
+            <Vehiclereservation columns={vehicleReservationColumns} />
+          </ProtectedRoute>
+        }
+      />
 
       {/* //ishara */}
       <Route path="/tours/home" element={<ToursHome />} />
