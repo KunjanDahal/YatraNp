@@ -356,3 +356,57 @@ export const trainColumns = [
     width: 100,
   },
 ];
+
+export const restaurantColumns = [
+  {
+    field: "uploadResimage",
+    headerName: "Image",
+    width: 70,
+    renderCell: (params) => {
+      return (
+        <div className="cellWithImg">
+          <img
+            className="cellImg"
+            src={params.row.uploadResimage || "https://i.ibb.co/MBtjqXQ/no-avatar.gif"}
+            alt="avatar"
+          />
+        </div>
+      );
+    },
+  },
+  {
+    field: "name",
+    headerName: "Name",
+    width: 200,
+  },
+  {
+    field: "type",
+    headerName: "Restaurant Type",
+    width: 150,
+  },
+  {
+    field: "city",
+    headerName: "City",
+    width: 100,
+  },
+  {
+    field: "contactNo",
+    headerName: "Contact",
+    width: 120,
+  },
+  {
+    field: "capacity",
+    headerName: "Capacity",
+    width: 100,
+  },
+  {
+    field: "priceRange",
+    headerName: "Price Range",
+    width: 120,
+  },
+  {
+    field: "staffAmount",
+    headerName: "Staff",
+    width: 100,
+  }
+];

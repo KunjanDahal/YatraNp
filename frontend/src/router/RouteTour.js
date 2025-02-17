@@ -72,6 +72,8 @@ import { SalaryCalculation } from "../pages/SalaryCalculation";
 import { EmployeeList } from "../pages/EmployeeList";
 import { SalarySheet } from "../pages/SalarySheet";
 import { FinanceHealth } from "../pages/FinanceHealth";
+import RestaurantForm from "../pages/Restaturant/RestaurantForm";
+import Restaurantlist from "../pages/Restaurantlist";
 
 const RouteTour = () => {
   const ProtectedRoute = ({ children }) => {
@@ -208,7 +210,7 @@ const RouteTour = () => {
 
 
       {/* navindi */}
-      <Route path="/addrestaurant" element={<RestaurentForm />} />
+      <Route path="/addrestaurant" element={<RestaurantForm />} />
 
       
       
@@ -225,7 +227,7 @@ const RouteTour = () => {
       <Route path="/hotelbooking" element={<HotelBook />} />
 
       {/* Navindi */}
-      <Route path="/addrestaurants" element={<RestaurentForm />} />
+      <Route path="/addrestaurants" element={<RestaurantForm />} />
 
       {/*Dinidu*/}
       <Route path="/finance" element={<Main />} />
@@ -236,6 +238,10 @@ const RouteTour = () => {
       {<Route path="/finance/refund" element={<Refund />} />}
       {<Route path="finance/addRefund" element={<RefundReq />} />}
       {<Route path="finance/updateRefund/:id" element={<RefundUpdate />} />}
+
+      {/* Restaurant Management */}
+      <Route path="/restaurant" element={<Restaurantlist />} />
+      <Route path="/addrestaurant" element={<RestaurantForm />} />
     </Routes>
   );
 };

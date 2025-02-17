@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import FileBase from "react-file-base64";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
+// Add axios default base URL
+axios.defaults.baseURL = "http://localhost:5000";
+
 const RestaurantForm = () => {
   const navigate = useNavigate();
   const [name, setName] = useState("");
@@ -60,21 +64,23 @@ const RestaurantForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/api/restaurant", {
-        name: name,
-        type: type, // Replace with a valid ActivityType _id
-        staffAmount: staffAmount,
-        qualification: qualification,
-        capacity: capacity,
-        regNo: regNo,
-        city: city,
+      // Since we're using FileBase64, we don't need FormData
+      const restaurantData = {
+        name,
+        type,
+        staffAmount,
+        qualification,
+        capacity,
+        regNo,
+        city,
         Address: address,
-        contactNo: contactNo,
-        priceRange: priceRange,
-        uploadResimage: uploadResimage,
-        uploadRegimage: uploadRegimage,
-      });
+        contactNo,
+        priceRange,
+        uploadResimage,
+        uploadRegimage
+      };
 
+      await axios.post("/api/restaurant", restaurantData);
       navigate("/restaurant");
     } catch (error) {
       console.log(error.message);

@@ -83,10 +83,34 @@ const HotelOverview = () => {
       className="ml-10 w-64 h-64 rounded-lg mb-2"
       onError={(e) => { 
         e.target.onerror = null; 
-        e.target.src = 'logo512.png'; // Changed to a more common fallback image
+        e.target.src = 'logo512.png';
       }}
     />
   ))}
+</div>
+
+{/* Hotel Certificates Section */}
+<h1 className="text-center lg:text-left py-5 font-bold text-2xl ml-10">
+  Hotel Certificates
+</h1>
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10 px-10">
+  {data.certificates && data.certificates.map((certificate, index) => (
+    <div key={index} className="flex flex-col items-center">
+      <img
+        src={`http://localhost:5000/api/hotels/images/${certificate}`}
+        alt={`Certificate ${index + 1}`}
+        className="w-full max-w-lg rounded-lg shadow-md"
+        onError={(e) => { 
+          e.target.onerror = null; 
+          e.target.src = 'logo512.png';
+        }}
+      />
+      <p className="mt-2 text-gray-600 font-medium">Certificate {index + 1}</p>
+    </div>
+  ))}
+  {(!data.certificates || data.certificates.length === 0) && (
+    <p className="text-gray-500 italic">No certificates available</p>
+  )}
 </div>
     </div>
   );
