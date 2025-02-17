@@ -195,7 +195,7 @@ const AddTourPackage = () => {
                     }}
                   >
                     <option>--Select one--</option>
-                    <option value={"sun and beach"}>Sun and Beach</option>
+                    
                     <option value={"hiking and trekking"}>
                       Hiking and Trekking
                     </option>
@@ -300,7 +300,7 @@ const AddTourPackage = () => {
                     <option value={7}>7 Days</option>
                     <option value={9}>9 Days</option>
                     <option value={12}>12 Days</option>
-                    <option value={15}>15 Days</option>
+                    <option value={15}>More than 15 Days</option>
                   </select>
                 </div>
               </div>

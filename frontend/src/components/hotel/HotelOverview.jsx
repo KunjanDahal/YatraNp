@@ -34,10 +34,10 @@ const HotelOverview = () => {
         </h1>
         <div className="flex justify-center items-center w-full flex-col lg:flex-row pt-12 lg:pt-0">
           <img
-            src={HotelImg}
+            src={`http://localhost:5000/api/hotels/images/${data.HotelImg}`}
             alt="Hotel Image"
             className="w-[320px] md:w-[700px] lg:w-[800px] rounded-lg mb-10"
-            onError={(e) => { e.target.onerror = null; e.target.src = 'path/to/your/fallback/image.jpg'; }} // Fallback image
+            onError={(e) => { e.target.onerror = null; e.target.src = ''; }} // Fallback image
           />
 
           <div className="lg:px-24">
@@ -72,19 +72,22 @@ const HotelOverview = () => {
       </div>
       
       <h1 className="text-center lg:text-left py-5 font-bold text-2xl ml-10">
-        Images of our hotel
-      </h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-10">
-        {HotelImgs && HotelImgs.map((image, index) => (
-          <img
-            src={image} // Assuming this is already a full URL
-            alt={`Hotel Image ${index}`}
-            key={index}
-            className="ml-10 w-64 h-64 rounded-lg mb-2"
-            onError={(e) => { e.target.onerror = null; e.target.src = 'path/to/your/fallback/image.jpg'; }} // Fallback image
-          />
-        ))}
-      </div>
+  Images of our hotel
+</h1>
+<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-10">
+  {HotelImgs && HotelImgs.map((image, index) => (
+    <img
+      src={`http://localhost:5000/api/hotels/images/${image}`}
+      alt={`Hotel Image ${index}`}
+      key={index}
+      className="ml-10 w-64 h-64 rounded-lg mb-2"
+      onError={(e) => { 
+        e.target.onerror = null; 
+        e.target.src = 'logo512.png'; // Changed to a more common fallback image
+      }}
+    />
+  ))}
+</div>
     </div>
   );
 };

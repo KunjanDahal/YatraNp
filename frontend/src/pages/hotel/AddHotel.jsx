@@ -211,15 +211,13 @@ export const AddHotel = () => {
                 id="province"
                 onChange={(e) => setProvince(e.target.value)}
               >
-                <option>SOUTHERN PROVINCE</option>
-                <option>WESTERN PROVINCE</option>
-                <option>CENTRAL PROVINCE</option>
-                <option>SABARAGAMUWA PROVINCE</option>
-                <option>EASTERN PROVINCE</option>
-                <option>UVA PROVINCE</option>
-                <option>NORTH WESTERN PROVINCE</option>
-                <option>NORTH CENTRAL PROVINCE</option>
-                <option>NORTHERN PROVINCE</option>
+                <option>Province No. 1</option>
+                <option>Madhesh Province</option>
+                <option>Bagmati Province</option>
+                <option>Gandaki Province</option>
+                <option>Lumbini Province</option>
+                <option>Karnali Province</option>
+                <option>Sudurpashchim Province</option>
               </select>
               <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                 <svg

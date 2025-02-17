@@ -31,7 +31,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await Swal.fire({
-      title: "Do You want to signup with Travely?",
+      title: "Do You want to signup with YatraNp?",
       showDenyButton: true,
       showCancelButton: true,
       confirmButtonText: "Save",
@@ -114,7 +114,7 @@ const Register = () => {
         });
 
         Swal.fire(
-          "Congratulations! You Have Successfully Registered with Travely",
+          "Congratulations! You Have Successfully Registered with YatraNp",
           "",
           "success"
         );
@@ -131,7 +131,7 @@ const Register = () => {
         });
 
         Swal.fire(
-          "Congratulations! You Have Successfully Registered with Travely",
+          "Congratulations! You Have Successfully Registered with YatraNp",
           "",
           "success"
         );

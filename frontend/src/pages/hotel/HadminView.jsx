@@ -87,15 +87,6 @@ const HadminView = () => {
   </button>
 </div>
 
-
-
-            
-
-            
-           
-           
-            
-            
             <h1 className="text-center md:text-left py-5 font-bold text-1.5xl">
               {state.title}
             </h1>
@@ -149,9 +140,9 @@ const HadminView = () => {
 </div>
 
 <h1 className="text-center lg:text-left py-5 font-bold text-2xl ml-10">
-            Certificates of {state.name} hotel
-            </h1>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-10">
+  Certificates of {state.name} hotel
+</h1>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-10">
   {state.certificates &&
     state.certificates.map((image, index) => (
       <img
@@ -161,8 +152,6 @@ const HadminView = () => {
         class="ml-10 w-64 h-64 rounded-lg mb-2"
       />
     ))}
-
-    
 </div>
            
 
