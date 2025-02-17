@@ -9,7 +9,7 @@ import moment from "moment";
 const Vehiclelist = ({ columns }) => {
   const location = useLocation();
   const path = location.pathname.split("/")[1];
-  const { data } = useFetch(`${path}`);
+  const { data } = useFetch(`/api/${path}`);
 
   function generatePDF(tickets) {
     const doc = new jspdf();
