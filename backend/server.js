@@ -28,7 +28,10 @@ app.use(express.json({ limit: "50mb", extended: true }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Middleware for handling CORS
-app.use(cors());
+app.use(cors({
+  origin: ["http://localhost:30000", "http://localhost:3000"],
+  credentials: true
+}));
 
 // Middleware for parsing cookies
 app.use(cookieParser());
@@ -57,6 +60,18 @@ app.use("/api/hotels/images", express.static(path.join(__dirname, "images")));
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 
+//tour
+const tourRouter = require("./routes/tourRouter");
+app.use("/api/tours", tourRouter);
+
+//hotel
+const hotels = require('./routes/hotels');
+app.use('/api/hotels', hotels);
+
+//restaurant
+const restaurants = require('./routes/restaurants');
+app.use('/api/restaurant', restaurants);
+
 // Default Route
 app.get("/", (req, res) => {
   res.send("API is Running Successfully");
@@ -72,19 +87,11 @@ const server = app.listen(port, () =>
 const io = require("socket.io")(server, {
   pingTimeout: 60000,
   cors: {
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:30000", "http://localhost:3000"],
   },
 });
 
 io.on("connection", (socket) => {
   console.log("Connected to socket.io".cyan.bold);
 });
-
-//tour
-const tourRouter = require("./routes/tourRouter");
-app.use("/api/tours", tourRouter);
-
-//hotel
-const hotels = require('./routes/hotels');
-app.use('/api/hotels', hotels);
 

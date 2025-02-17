@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+// Configure axios defaults
+axios.defaults.baseURL = "http://localhost:5000";
+
 const useFetch = (url) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -13,7 +16,7 @@ const useFetch = (url) => {
         const res = await axios.get(url);
         setData(res.data);
       } catch (err) {
-        setError(err);
+        setError(err.message);
       }
       setLoading(false);
     };
@@ -26,7 +29,7 @@ const useFetch = (url) => {
       const res = await axios.get(url);
       setData(res.data);
     } catch (err) {
-      setError(err);
+      setError(err.message);
     }
     setLoading(false);
   };

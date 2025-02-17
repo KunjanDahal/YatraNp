@@ -18,7 +18,7 @@ const Datatable = ({ columns }) => {
   const [list, setList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data } = useFetch(`${path}`);
+  const { data } = useFetch(`/api/${path}`);
 
   const navigate = useNavigate();
 
@@ -40,7 +40,7 @@ const Datatable = ({ columns }) => {
     if (confirmResult.isConfirmed) {
       try {
         setIsLoading(true);
-        await axios.delete(`${path}/${id}`);
+        await axios.delete(`/api/${path}/${id}`);
         setIsLoading(false);
       } catch (error) {
         console.log(error);
@@ -53,20 +53,20 @@ const Datatable = ({ columns }) => {
   const handleview = async (id) => {
     try {
       if (path === "users") {
-        const userdata = await axios.get(`${path}/${id}`);
+        const userdata = await axios.get(`/api/${path}/${id}`);
         navigate("/userpage", { state: userdata.data });
       }
       if (path === "hotels") {
-        const hoteldata = await axios.get(`${path}/find/${id}`);
+        const hoteldata = await axios.get(`/api/${path}/find/${id}`);
         navigate("/hoteladmin", { state: hoteldata.data });
       }
       if (path === "vehicle") {
-        const vehicledata = await axios.get(`${path}/${id}`);
+        const vehicledata = await axios.get(`/api/${path}/${id}`);
         navigate("/vehicle/view/", { state: vehicledata.data });
       }
       //path tour
       if (path === "tours") {
-        const tourData = await axios.get(`${path}/${id}`);
+        const tourData = await axios.get(`/api/${path}/${id}`);
         navigate("/tour/view", { state: tourData.data });
       }
     } catch (error) {
