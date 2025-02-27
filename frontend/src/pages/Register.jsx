@@ -6,6 +6,10 @@ import Swal from "sweetalert2";
 import backgroundImage from "../assets/images/bg.jpg";
 import Spinner from "../components/spinner/LoadingSpinner";
 
+// Configure axios defaults
+axios.defaults.baseURL = 'http://localhost:5000';
+axios.defaults.withCredentials = true;
+
 const Register = () => {
   const [loading2, setLoading2] = useState(false);
 
@@ -78,7 +82,7 @@ const Register = () => {
     setLoading2(true);
 
     try {
-      const existingUser = await axios.get(`auth/check-email?email=${email}`);
+      const existingUser = await axios.get(`/api/auth/check-email?email=${email}`);
 
       if (existingUser.data.message === "Email already exists") {
         Swal.fire({
@@ -102,7 +106,7 @@ const Register = () => {
 
         const { url } = uploadRes.data;
 
-        const response = await axios.post("auth/register", {
+        const response = await axios.post("/api/auth/register", {
           name,
           email,
           mobile,
@@ -110,7 +114,7 @@ const Register = () => {
           type,
           password,
           img: url,
-          isAdmin :type == "admin"
+          isAdmin: type === "admin"
         });
 
         Swal.fire(
@@ -120,14 +124,14 @@ const Register = () => {
         );
         navigate("/login");
       } else {
-        const response = await axios.post("auth/register", {
+        const response = await axios.post("/api/auth/register", {
           name,
           email,
           mobile,
           country,
           type,
           password,
-          isAdmin :type == "admin"
+          isAdmin: type === "admin"
         });
 
         Swal.fire(
@@ -140,20 +144,20 @@ const Register = () => {
 
       setLoading2(false);
     } catch (err) {
-      if (err.message === "Request failed with status code 409") {
+      console.error('Registration error:', err);
+      if (err.response?.status === 409) {
         Swal.fire({
           icon: "error",
           title: "Oops...",
           text: "User with this email already exists!",
         });
-        setLoading2(false);
-        return;
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: err.response?.data?.message || "Registration failed. Please try again.",
+        });
       }
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: err.message,
-      });
       setLoading2(false);
     }
   };

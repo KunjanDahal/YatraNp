@@ -1,11 +1,15 @@
 import axios from "axios";
-import { useContext, useState,useEffect } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/authContext";
 import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
 import backgroundImage from "../assets/images/bg.jpg";
 import Spinner from "../components/spinner/LoadingSpinner";
+
+// Configure axios defaults
+axios.defaults.baseURL = 'http://localhost:5000';
+axios.defaults.withCredentials = true;
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
@@ -25,35 +29,46 @@ const Login = () => {
     window.location.href = 'http://localhost:5000/api/auth/google';
   };
 
-
   const handleClick = async (e) => {
     e.preventDefault();
     dispatch({ type: "LOGIN_START" });
 
     if (!credentials.email || !credentials.password) {
       Swal.fire("Please enter your email and password", "", "error");
-      return
+      return;
     }
     if (!/\S+@\S+\.\S+/.test(credentials.email)) {
       Swal.fire("Please enter a valid email address", "", "error");
+      return; // Add return statement to prevent the API call
     }
+    
     try {
       setLoading2(true);
-      const res = await axios.post("auth/login", credentials);
+      const res = await axios.post("/api/auth/login", credentials, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
+      });
+      
       dispatch({ type: "LOGIN_SUCCESS", payload: res.data.details });
       setLoading2(false);
+      
       if (res.data.isAdmin === true) {
         navigate("/admin");
-      } else if (res.data.details.type == "financeManager") {
+      } else if (res.data.details.type === "financeManager") { // Changed == to ===
         navigate("/finance");
       } else if (res.data.isAdmin === false) {
         navigate("/");
       }
     } catch (err) {
-      dispatch({ type: "LOGIN_FAILURE", payload: err.response.data });
-      setTimeout(() => {
-        Swal.fire(err.response.data, "", "error");
-      }, 2000);
+      setLoading2(false);
+      dispatch({ type: "LOGIN_FAILURE", payload: err.response?.data });
+      Swal.fire({
+        icon: "error",
+        title: "Login Failed",
+        text: err.response?.data?.message || "Invalid credentials. Please try again.",
+      });
     }
   };
 

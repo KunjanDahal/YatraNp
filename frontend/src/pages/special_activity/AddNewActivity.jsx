@@ -4,8 +4,11 @@ import "react-datepicker/dist/react-datepicker.css";
 import FileBase from "react-file-base64";
 import Swal from "sweetalert2";
 import { useLocation, useNavigate } from "react-router-dom";
-
 import axios from 'axios';
+
+// Configure axios defaults
+axios.defaults.baseURL = 'http://localhost:5000';
+axios.defaults.withCredentials = true; // Enable sending cookies with requests
 
 const ActivityForm = () => {
   const navigate = useNavigate();
@@ -16,24 +19,61 @@ const ActivityForm = () => {
   const [endDate, setEndDate] = useState(new Date());
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
-  const [activityType, setActivityType] = useState("");
+  const [activityType, setActivityType] = useState("INDOOR");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Check authentication and user type on component mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get('/api/auth/check');
+        if (!response.data.isAuthenticated) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Authentication Required',
+            text: 'Please log in to create activities',
+          });
+          navigate('/login');
+          return;
+        }
+
+        // Check if user is an event organizer
+        if (response.data.user.type !== 'eventOrganizer') {
+          Swal.fire({
+            icon: 'error',
+            title: 'Access Denied',
+            text: 'Only event organizers can create activities',
+          });
+          navigate('/');
+          return;
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Authentication Error',
+          text: 'Please log in to continue',
+        });
+        navigate('/login');
+      }
+    };
+    checkAuth();
+  }, [navigate]);
+
   useEffect(() => {
     const activity = locationRoute.state?.activity;
-    console.log(activity);
     if (activity) {
       setIsEditing(true);
       setName(activity.name);
       setLocation(activity.location);
       setStartDate(new Date(activity.dateRange.startDate));
       setEndDate(new Date(activity.dateRange.endDate));
-
       setStartTime(activity.timeRange.startTime);
       setEndTime(activity.timeRange.endTime);
-      setActivityType(activity.type);
+      setActivityType(activity.type || "INDOOR");
       setDescription(activity.description);
       setImage(activity.image);
     }
@@ -93,46 +133,68 @@ const ActivityForm = () => {
     e.preventDefault();
     try {
       setIsLoading(true);
+      const activityData = {
+        name,
+        location,
+        dateRange: {
+          startDate,
+          endDate,
+        },
+        timeRange: {
+          startTime,
+          endTime,
+        },
+        type: activityType,
+        description,
+        image,
+      };
+
       if (isEditing) {
-        await axios.post("/activities", {
-          id: locationRoute.state.activity._id,
-          name: name,
-          location: location,
-          dateRange: {
-            startDate: startDate,
-            endDate: endDate,
-          },
-          timeRange: {
-            startTime: startTime,
-            endTime: endTime,
-          },
-          type: activityType, // Replace with a valid ActivityType _id
-          description: description,
-          image: image,
+        activityData.id = locationRoute.state.activity._id;
+      }
+
+      const response = await axios.post("/api/activities", activityData, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
+      });
+      
+      if (response.data.success || response.data.created || response.data.updated) {
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: isEditing ? "Activity updated successfully!" : "Activity created successfully!",
         });
+        navigate("/my-activities");
       } else {
-        await axios.post("/activities", {
-          name: name,
-          location: location,
-          dateRange: {
-            startDate: startDate,
-            endDate: endDate,
-          },
-          timeRange: {
-            startTime: startTime,
-            endTime: endTime,
-          },
-          type: activityType, // Replace with a valid ActivityType _id
-          description: description,
-          image: image,
+        throw new Error("Failed to save activity");
+      }
+    } catch (error) {
+      console.error(error);
+      if (error.response?.status === 401) {
+        Swal.fire({
+          icon: "error",
+          title: "Authentication Error",
+          text: "Please log in to create activities",
+        });
+        navigate('/login');
+      } else if (error.response?.status === 403) {
+        Swal.fire({
+          icon: "error",
+          title: "Access Denied",
+          text: "Only event organizers can create activities",
+        });
+        navigate('/');
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: error.response?.data?.message || "Failed to save activity. Please try again.",
         });
       }
+    } finally {
       setIsLoading(false);
-
-      navigate("/my-activities");
-    } catch (error) {
-      setIsLoading(false);
-      console.log(error.message);
     }
   };
 
@@ -146,7 +208,7 @@ const ActivityForm = () => {
           className="block text-blue-500 font-bold mb-6"
           style={{ fontSize: "28px" }}
         >
-          Create a new Special Activity!
+          {isEditing ? "Edit Activity" : "Create a new Special Activity!"}
         </p>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -207,14 +269,11 @@ const ActivityForm = () => {
               selected={endDate}
               startDate={startDate}
               endDate={endDate}
-              value={endDate}
               onChange={(date) => handleEndDateChange(date)}
               selectsEnd
               dateFormat="yyyy-MM-dd"
-              minDate={startDate ? new Date(startDate) : new Date()}
-              maxDate={
-                new Date(new Date().setFullYear(new Date().getFullYear() + 1))
-              }
+              minDate={startDate}
+              maxDate={new Date(new Date().setFullYear(new Date().getFullYear() + 1))}
               required
             />
           </div>
@@ -229,7 +288,6 @@ const ActivityForm = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="start-time"
               type="time"
-              placeholder="Start Time"
               value={startTime}
               onChange={handleStartTimeChange}
               required
@@ -238,7 +296,6 @@ const ActivityForm = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mt-2"
               id="end-time"
               type="time"
-              placeholder="End Time"
               value={endTime}
               onChange={handleEndTimeChange}
               required
@@ -258,9 +315,7 @@ const ActivityForm = () => {
               onChange={handleActivityTypeChange}
               required
             >
-              <option value="">Select Activity Type</option>
-              <option value="INDOOR">Indoor</option>{" "}
-              {/* Replace with valid options */}
+              <option value="INDOOR">Indoor</option>
               <option value="OUTDOOR">Outdoor</option>
             </select>
           </div>
@@ -290,7 +345,6 @@ const ActivityForm = () => {
             </label>
             <FileBase
               type="file"
-              value={image}
               multiple={false}
               onDone={({ base64 }) => setImage(base64)}
               required
@@ -309,41 +363,24 @@ const ActivityForm = () => {
               />
             )}
           </div>
-          {isLoading ? (
-            <button
-              className="bg-blue-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed"
-              disabled
-            >
-              <svg
-                className="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm12 0a8 8 0 100-16 8 8 0 000 16z"
-                ></path>
-              </svg>
-              Creating Activity...
-            </button>
-          ) : (
-            <button
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold mb-20 py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              type="submit"
-            >
-              Create Activity
-            </button>
-          )}
+          <button
+            className={`${
+              isLoading
+                ? "bg-blue-300 cursor-not-allowed"
+                : "bg-blue-500 hover:bg-blue-700"
+            } text-white font-bold mb-20 py-2 px-4 rounded focus:outline-none focus:shadow-outline`}
+            type="submit"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <span className="inline-block animate-spin mr-2">⌛</span>
+                {isEditing ? "Updating..." : "Creating..."}
+              </>
+            ) : (
+              isEditing ? "Update Activity" : "Create Activity"
+            )}
+          </button>
         </form>
       </div>
     </>

@@ -15,6 +15,7 @@ const { createImagesDirectory } = require('./config/init');
 // Import Routes
 const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/authRoutes");
+const activityRoutes = require("./routes/activityRoute");
 
 // Initialize Express app
 const app = express();
@@ -62,6 +63,7 @@ app.use("/images", express.static(path.join(__dirname, "images")));
 // API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/activities", activityRoutes);
 
 //tour
 const tourRouter = require("./routes/tourRouter");

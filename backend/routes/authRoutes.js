@@ -19,6 +19,19 @@ router.post("/forgot-password", resetpasswordrequest);
 router.post("/reset-password", resetpassword);
 router.get("/check-email", checkEmailExists);
 
+// Add authentication check endpoint
+router.get("/check", (req, res) => {
+  const token = req.cookies.access_token;
+  if (!token) {
+    return res.status(401).json({ isAuthenticated: false });
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT || 'mekarahasak');
+    res.json({ isAuthenticated: true, user: decoded });
+  } catch (err) {
+    res.status(401).json({ isAuthenticated: false });
+  }
+});
 
 router.get('/google',
   passport.authenticate('google', {
