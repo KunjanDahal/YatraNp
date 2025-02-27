@@ -8,7 +8,7 @@ const HotelOverview = () => {
 
   useEffect(() => {
     axios
-      .get(`/hotels/find/${id}`)
+      .get(`/api/hotels/find/${id}`)
       .then((response) => {
         setData(response.data);
         console.log(response.data.HotelImg); // Log fetched HotelImg directly

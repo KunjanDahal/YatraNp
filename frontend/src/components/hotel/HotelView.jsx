@@ -39,7 +39,7 @@ const checkOutDate = new Date(date.checkOutDate);
 
   useEffect(() => {
     axios
-      .get(`/hotels/find/${id}`)
+      .get(`/api/hotels/find/${id}`)
       .then((response) => {
         setData(response.data);
         console.log(data.HotelImg);

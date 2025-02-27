@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 
 const HotelCard = () => {
-  const { data, loading, error } = useFetch(`/hotels`);
+  const { data, loading, error } = useFetch(`/api/hotels`);
 
   if (loading) {
     return <div className="text-center">Loading...</div>; // Loading indicator
