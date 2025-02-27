@@ -76,7 +76,7 @@ const Restaurantlist = () => {
       </div>
 
       <div>
-        <Datatable columns={restaurantColumns} rows={data || []} />
+        <Datatable columns={restaurantColumns} />
       </div>
     </>
   );

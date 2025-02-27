@@ -74,6 +74,7 @@ import { SalarySheet } from "../pages/SalarySheet";
 import { FinanceHealth } from "../pages/FinanceHealth";
 import RestaurantForm from "../pages/Restaturant/RestaurantForm";
 import Restaurantlist from "../pages/Restaurantlist";
+import Restaurants from "../pages/Restaurants";
 
 const RouteTour = () => {
   const ProtectedRoute = ({ children }) => {
@@ -249,6 +250,11 @@ const RouteTour = () => {
       {<Route path="finance/updateRefund/:id" element={<RefundUpdate />} />}
 
       {/* Restaurant Management */}
+      <Route path="/restaurant" element={<Restaurantlist />} />
+      <Route path="/addrestaurant" element={<RestaurantForm />} />
+
+      {/* Restaurant routes */}
+      <Route path="/restaurants" element={<Restaurants />} />
       <Route path="/restaurant" element={<Restaurantlist />} />
       <Route path="/addrestaurant" element={<RestaurantForm />} />
     </Routes>

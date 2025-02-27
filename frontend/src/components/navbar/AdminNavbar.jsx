@@ -22,7 +22,7 @@ const inside_nav = [
     display: "Vehicles",
   },
   {
-    path: "/Restaurants",
+    path: "/restaurant",
     display: "Restaurants",
   },
   {
