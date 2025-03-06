@@ -7,22 +7,24 @@ const {
     userMiddleware,
     organizerMiddleware,
     adminMiddleware,
+    eventManagementMiddleware
 } = require('../middleware/authMiddleware.js');
 
-// Routes
-router.get('/', getApprovedActivities);
+// Public routes
+router.get('/approved', getApprovedActivities);
+router.get('/filter', userMiddleware, filterActivities);
 
-router.post('/', organizerMiddleware, createActivity);
-
-router.delete('/:id', organizerMiddleware, deleteActivity)
-
-router.get('/myActivities', organizerMiddleware, getMyActivities);
+// Admin-only routes
+router.post('/', adminMiddleware, createActivity);
+router.get('/pending', adminMiddleware, getPendingActivities);
 router.put('/approve/:id', adminMiddleware, approveActivity);
 router.put('/decline/:id', adminMiddleware, declineActivity);
-router.get('/approved', getApprovedActivities);
-router.get('/pending', adminMiddleware, getPendingActivities);
-router.get('/filter', filterActivities);
+router.delete('/:id', adminMiddleware, deleteActivity);
 
-router.get('/:id', getActivity);
+// Event organizer specific routes
+router.get('/myActivities', organizerMiddleware, getMyActivities);
+
+// These routes should come last to avoid conflicts with other routes
+router.get('/:id', userMiddleware, getActivity);
 
 module.exports = router;

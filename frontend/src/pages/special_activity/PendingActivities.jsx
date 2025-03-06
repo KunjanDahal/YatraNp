@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { DataGrid } from "@mui/x-data-grid";
 import CircularProgress from "@mui/material/CircularProgress";
+import { AuthContext } from "../../context/authContext";
+import Swal from "sweetalert2";
 
 const PendingActivities = () => {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
   const [activities, setActivities] = useState([]);
   const [filteredActivities, setFilteredActivities] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -66,8 +69,12 @@ const PendingActivities = () => {
   ];
 
   useEffect(() => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
     fetchActivities();
-  }, []);
+  }, [user, navigate]);
 
   useEffect(() => {
     if (searchQuery.trim() === "") {
@@ -92,16 +99,65 @@ const PendingActivities = () => {
   const fetchActivities = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get("activities/pending");
-      if (response.data.success) {
-        setActivities(response.data.activities);
-        setFilteredActivities(response.data.activities);
-      } else {
-        console.log("Failed to fetch activities");
+      // Try to get token from localStorage first, then from cookies
+      const token = localStorage.getItem('token') || document.cookie
+        .split('; ')
+        .find(row => row.startsWith('access_token='))
+        ?.split('=')[1];
+
+      if (!token) {
+        console.log('No token found, redirecting to login');
+        navigate('/login');
+        return;
       }
-      setIsLoading(false);
+
+      console.log('Using token:', token.substring(0, 20) + '...');
+
+      // Configure axios
+      const axiosConfig = {
+        baseURL: 'http://localhost:5000',
+        withCredentials: true,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      };
+
+      console.log('Making request with config:', axiosConfig);
+
+      const response = await axios.get("/api/activities/pending", axiosConfig);
+      
+      console.log('Response:', response.data);
+
+      if (response.data.success) {
+        setActivities(response.data.activities || []);
+        setFilteredActivities(response.data.activities || []);
+      } else {
+        throw new Error(response.data.message || 'Failed to fetch activities');
+      }
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching activities:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        stack: error.stack
+      });
+      
+      if (error.response?.status === 401) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Authentication Error',
+          text: 'Please log in again to continue',
+        });
+        navigate('/login');
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.response?.data?.message || 'Failed to fetch activities. Please try again.',
+        });
+      }
+    } finally {
       setIsLoading(false);
     }
   };
@@ -109,24 +165,76 @@ const PendingActivities = () => {
   const handleAccept = async (id) => {
     setIsLoading(true);
     try {
-      const response = await axios.put(`activities/approve/${id}`);
-      fetchActivities();
-      console.log(response.data);
+      const token = localStorage.getItem('token') || document.cookie
+        .split('; ')
+        .find(row => row.startsWith('access_token='))
+        ?.split('=')[1];
+
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await axios.put(`http://localhost:5000/api/activities/approve/${id}`, {}, {
+        withCredentials: true,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      await fetchActivities();
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'Activity approved successfully',
+      });
     } catch (error) {
+      console.error("Error details:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.response?.data?.message || 'Failed to approve activity',
+      });
+    } finally {
       setIsLoading(false);
-      console.error(error);
     }
   };
 
   const handleDecline = async (id) => {
     setIsLoading(true);
     try {
-      const response = await axios.put(`activities/decline/${id}`);
-      fetchActivities();
-      console.log(response.data);
+      const token = localStorage.getItem('token') || document.cookie
+        .split('; ')
+        .find(row => row.startsWith('access_token='))
+        ?.split('=')[1];
+
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await axios.put(`http://localhost:5000/api/activities/decline/${id}`, {}, {
+        withCredentials: true,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      await fetchActivities();
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: 'Activity declined successfully',
+      });
     } catch (error) {
+      console.error("Error details:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.response?.data?.message || 'Failed to decline activity',
+      });
+    } finally {
       setIsLoading(false);
-      console.error(error);
     }
   };
 

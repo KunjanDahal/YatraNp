@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/authContext";
 import { Link } from "react-router-dom";
@@ -51,11 +51,18 @@ const Login = () => {
         withCredentials: true
       });
       
-      // Store both the user details and isAdmin status
+      // Store both the user details and token
       const userData = {
         ...res.data.details,
         isAdmin: res.data.isAdmin
       };
+
+      // Store token in localStorage
+      if (res.data.token) {
+        localStorage.setItem('token', res.data.token);
+        // Set the token in axios defaults for future requests
+        axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
+      }
       
       dispatch({ type: "LOGIN_SUCCESS", payload: userData });
       setLoading2(false);

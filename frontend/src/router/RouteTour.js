@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Admin from "../pages/Admin";
@@ -78,6 +78,7 @@ import Restaurants from "../pages/Restaurants";
 
 const RouteTour = () => {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   // Public routes - accessible without login
   const PublicRoute = ({ children }) => {
@@ -104,8 +105,28 @@ const RouteTour = () => {
     if (user.isAdmin) {
       return children;
     }
-    // If not admin, redirect to home
-    return <Navigate to="/" />;
+    // If not admin, show access denied message
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+          <div className="text-center">
+            <div className="mb-4 text-red-500">
+              <svg className="mx-auto w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
+            <p className="text-gray-600 mb-4">Only administrators can access this section.</p>
+            <button
+              onClick={() => navigate(-1)}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // Regular user only routes
@@ -119,6 +140,39 @@ const RouteTour = () => {
     }
     // If admin, redirect to admin dashboard
     return <Navigate to="/admin" />;
+  };
+
+  // Event Management Route - accessible by both admins and event organizers
+  const EventManagementRoute = ({ children }) => {
+    if (!user) {
+      return <Navigate to="/login" />;
+    }
+    // Allow access if user is admin or event organizer
+    if (user.isAdmin || user.type === "eventOrganizer") {
+      return children;
+    }
+    // If not authorized, show access denied message
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+          <div className="text-center">
+            <div className="mb-4 text-red-500">
+              <svg className="mx-auto w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
+            <p className="text-gray-600 mb-4">Only administrators and event organizers can access this section.</p>
+            <button
+              onClick={() => navigate(-1)}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -148,7 +202,7 @@ const RouteTour = () => {
       <Route path="/tours/:id" element={<UserRoute><TourDetails /></UserRoute>} />
       <Route path="/hotelhome" element={<UserRoute><HotelHome /></UserRoute>} />
       <Route path="/hotel/:id" element={<UserRoute><HotelView /></UserRoute>} />
-      <Route path="/events" element={<UserRoute><FilterActivities /></UserRoute>} />
+      <Route path="/events" element={<SharedRoute><FilterActivities /></SharedRoute>} />
 
       {/* Protected routes that need specific handling */}
       <Route path="/vehicle/edit/:id" element={<AdminRoute><EditVehicle /></AdminRoute>} />
@@ -189,10 +243,38 @@ const RouteTour = () => {
       <Route path="/contactus" element={<ContactUs />} />
       
       {/* Admin Activity Management */}
-      <Route path="/add-new-activity" element={<AdminRoute><ActivityForm /></AdminRoute>} />
-      <Route path="/add-new-activity/:id" element={<AdminRoute><ActivityForm /></AdminRoute>} />
-      <Route path="/pending-activities" element={<AdminRoute><PendingActivities /></AdminRoute>} />
-      <Route path="/pending-reservations" element={<AdminRoute><PendingReservationsPage /></AdminRoute>} />
+      <Route 
+        path="/add-new-activity" 
+        element={
+          <AdminRoute>
+            <ActivityForm />
+          </AdminRoute>
+        } 
+      />
+      <Route 
+        path="/add-new-activity/:id" 
+        element={
+          <AdminRoute>
+            <ActivityForm />
+          </AdminRoute>
+        } 
+      />
+      <Route 
+        path="/pending-activities" 
+        element={
+          <AdminRoute>
+            <PendingActivities />
+          </AdminRoute>
+        } 
+      />
+      <Route 
+        path="/pending-reservations" 
+        element={
+          <AdminRoute>
+            <PendingReservationsPage />
+          </AdminRoute>
+        } 
+      />
       
       {/* Admin Hotel Management */}
       <Route path="/addrestaurant" element={<AdminRoute><RestaurantForm /></AdminRoute>} />

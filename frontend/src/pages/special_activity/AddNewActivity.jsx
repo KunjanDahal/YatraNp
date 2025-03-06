@@ -1,18 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import FileBase from "react-file-base64";
 import Swal from "sweetalert2";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from 'axios';
+import { AuthContext } from "../../context/authContext";
 
 // Configure axios defaults
 axios.defaults.baseURL = 'http://localhost:5000';
-axios.defaults.withCredentials = true; // Enable sending cookies with requests
+axios.defaults.withCredentials = true;
 
 const ActivityForm = () => {
   const navigate = useNavigate();
   const locationRoute = useLocation();
+  const { user } = useContext(AuthContext);
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
   const [startDate, setStartDate] = useState(new Date());
@@ -25,43 +27,28 @@ const ActivityForm = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Check authentication and user type on component mount
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await axios.get('/api/auth/check');
-        if (!response.data.isAuthenticated) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Authentication Required',
-            text: 'Please log in to create activities',
-          });
-          navigate('/login');
-          return;
-        }
+    if (!user) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Authentication Required',
+        text: 'Please log in to create activities',
+      });
+      navigate('/login');
+      return;
+    }
 
-        // Check if user is an event organizer
-        if (response.data.user.type !== 'eventOrganizer') {
-          Swal.fire({
-            icon: 'error',
-            title: 'Access Denied',
-            text: 'Only event organizers can create activities',
-          });
-          navigate('/');
-          return;
-        }
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Authentication Error',
-          text: 'Please log in to continue',
-        });
-        navigate('/login');
-      }
-    };
-    checkAuth();
-  }, [navigate]);
+    // Check if user is an admin
+    if (!user.isAdmin) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Access Denied',
+        text: 'Only administrators can create activities',
+      });
+      navigate('/');
+      return;
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     const activity = locationRoute.state?.activity;
@@ -133,12 +120,27 @@ const ActivityForm = () => {
     e.preventDefault();
     try {
       setIsLoading(true);
+      
+      // Get token from localStorage or cookies
+      const token = localStorage.getItem('token') || document.cookie
+        .split('; ')
+        .find(row => row.startsWith('access_token='))
+        ?.split('=')[1];
+
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      // Format dates properly
+      const formattedStartDate = startDate.toISOString();
+      const formattedEndDate = endDate.toISOString();
+
       const activityData = {
         name,
         location,
         dateRange: {
-          startDate,
-          endDate,
+          startDate: formattedStartDate,
+          endDate: formattedEndDate,
         },
         timeRange: {
           startTime,
@@ -153,11 +155,13 @@ const ActivityForm = () => {
         activityData.id = locationRoute.state.activity._id;
       }
 
+      // Set the token in axios defaults for this request
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
       const response = await axios.post("/api/activities", activityData, {
         headers: {
           'Content-Type': 'application/json'
-        },
-        withCredentials: true
+        }
       });
       
       if (response.data.success || response.data.created || response.data.updated) {
@@ -166,12 +170,12 @@ const ActivityForm = () => {
           title: "Success!",
           text: isEditing ? "Activity updated successfully!" : "Activity created successfully!",
         });
-        navigate("/my-activities");
+        navigate("/pending-activities");
       } else {
-        throw new Error("Failed to save activity");
+        throw new Error(response.data.message || "Failed to save activity");
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error creating activity:", error.response?.data || error);
       if (error.response?.status === 401) {
         Swal.fire({
           icon: "error",
@@ -183,14 +187,14 @@ const ActivityForm = () => {
         Swal.fire({
           icon: "error",
           title: "Access Denied",
-          text: "Only event organizers can create activities",
+          text: "Only administrators can create activities",
         });
         navigate('/');
       } else {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: error.response?.data?.message || "Failed to save activity. Please try again.",
+          text: error.response?.data?.message || error.message || "Failed to save activity. Please try again.",
         });
       }
     } finally {

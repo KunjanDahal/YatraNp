@@ -5,13 +5,13 @@ const { createError } = require("../middleware/error");
 const nodemailer = require("nodemailer");
 
 const generateToken = (payload) => {
-  const token = jwt.sign(payload, "secretKey", { expiresIn: "1h" });
+  const token = jwt.sign(payload, process.env.JWT, { expiresIn: "1h" });
   return token;
 };
 
 const verifyToken = (token) => {
   try {
-    const decoded = jwt.verify(token, "secretKey");
+    const decoded = jwt.verify(token, process.env.JWT);
     return decoded;
   } catch (err) {
     throw new Error("Invalid token");
@@ -45,38 +45,52 @@ const loginUser = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
-      return res.status(404).send("User not found");
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
     }
 
     const isMatch = await bcrypt.compare(req.body.password, user.password);
-
     if (!isMatch) {
-      return res.status(404).send("wrong password");
+      return res.status(401).json({
+        success: false,
+        message: "Invalid password"
+      });
     }
 
     // Create token with user ID and admin status
     const token = jwt.sign(
       { id: user._id, isAdmin: user.isAdmin },
-      process.env.JWT || 'mekarahasak'
+      process.env.JWT,
+      { expiresIn: '24h' }
     );
 
     // Separate password from user data
     const { password, ...otherDetails } = user._doc;
 
+    // Set cookie options
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    };
+
     res
-      .cookie("access_token", token, {
-        httpOnly: true,
-      })
+      .cookie("access_token", token, cookieOptions)
       .status(200)
       .json({
+        success: true,
         details: {
           ...otherDetails,
-          isAdmin: user.isAdmin  // Include isAdmin in details
+          isAdmin: user.isAdmin
         },
         isAdmin: user.isAdmin,
         token
       });
   } catch (error) {
+    console.error('Login error:', error);
     next(error);
   }
 };
