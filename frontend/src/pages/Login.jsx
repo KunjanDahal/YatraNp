@@ -39,7 +39,7 @@ const Login = () => {
     }
     if (!/\S+@\S+\.\S+/.test(credentials.email)) {
       Swal.fire("Please enter a valid email address", "", "error");
-      return; // Add return statement to prevent the API call
+      return;
     }
     
     try {
@@ -51,14 +51,20 @@ const Login = () => {
         withCredentials: true
       });
       
-      dispatch({ type: "LOGIN_SUCCESS", payload: res.data.details });
+      // Store both the user details and isAdmin status
+      const userData = {
+        ...res.data.details,
+        isAdmin: res.data.isAdmin
+      };
+      
+      dispatch({ type: "LOGIN_SUCCESS", payload: userData });
       setLoading2(false);
       
-      if (res.data.isAdmin === true) {
+      if (userData.isAdmin) {
         navigate("/admin");
-      } else if (res.data.details.type === "financeManager") { // Changed == to ===
+      } else if (userData.type === "financeManager") {
         navigate("/finance");
-      } else if (res.data.isAdmin === false) {
+      } else {
         navigate("/");
       }
     } catch (err) {

@@ -77,186 +77,151 @@ import Restaurantlist from "../pages/Restaurantlist";
 import Restaurants from "../pages/Restaurants";
 
 const RouteTour = () => {
-  const ProtectedRoute = ({ children }) => {
-    const { user } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
 
+  // Public routes - accessible without login
+  const PublicRoute = ({ children }) => {
+    if (user) {
+      return user.isAdmin ? <Navigate to="/admin" /> : <Navigate to="/" />;
+    }
+    return children;
+  };
+
+  // Shared routes - accessible by both admin and regular users
+  const SharedRoute = ({ children }) => {
     if (!user) {
       return <Navigate to="/login" />;
     }
     return children;
   };
 
+  // Admin only routes
+  const AdminRoute = ({ children }) => {
+    if (!user) {
+      return <Navigate to="/login" />;
+    }
+    // Only allow access if user is an admin
+    if (user.isAdmin) {
+      return children;
+    }
+    // If not admin, redirect to home
+    return <Navigate to="/" />;
+  };
+
+  // Regular user only routes
+  const UserRoute = ({ children }) => {
+    if (!user) {
+      return <Navigate to="/login" />;
+    }
+    // Only allow access if user is NOT an admin
+    if (!user.isAdmin) {
+      return children;
+    }
+    // If admin, redirect to admin dashboard
+    return <Navigate to="/admin" />;
+  };
+
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
+      {/* Public routes */}
+      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute>
-            <Admin />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="/register" element={<Register />} />
+      {/* Shared routes - different layout based on user type */}
+      <Route path="/profile" element={<SharedRoute><Profile /></SharedRoute>} />
+      <Route path="/updateProfile" element={<SharedRoute><Profileupdate /></SharedRoute>} />
 
-      <Route
-        path="/users"
-        element={
-          <ProtectedRoute>
-            <Userlist columns={userColumns} />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/hotels"
-        element={
-          <ProtectedRoute>
-            <Hotellist columns={hotelColumns} />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/tours"
-        element={
-          <ProtectedRoute>
-            <Tourlist columns={tourColumns} />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/tourreservation/all"
-        element={
-          <ProtectedRoute>
-            <Tourreservations columns={tourReservationColumns} />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/train"
-        element={
-          <ProtectedRoute>
-            <Trainlist columns={trainColumns} />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/vehicle"
-        element={
-          <ProtectedRoute>
-            <Vehiclelist columns={vehicleColumns} />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/vehiclereservation"
-        element={
-          <ProtectedRoute>
-            <Vehiclereservation columns={vehicleReservationColumns} />
-          </ProtectedRoute>
-        }
-      />
+      {/* Admin-only routes */}
+      <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
+      <Route path="/users" element={<AdminRoute><Userlist columns={userColumns} /></AdminRoute>} />
+      <Route path="/hotels" element={<AdminRoute><Hotellist columns={hotelColumns} /></AdminRoute>} />
+      <Route path="/tours" element={<AdminRoute><Tourlist columns={tourColumns} /></AdminRoute>} />
+      <Route path="/vehicle" element={<AdminRoute><Vehiclelist columns={vehicleColumns} /></AdminRoute>} />
+      <Route path="/vehicle/add" element={<AdminRoute><AddVehicle /></AdminRoute>} />
+      <Route path="/adduser" element={<AdminRoute><Adduser /></AdminRoute>} />
 
-      <Route path="/userpage" element={<UserpageA />} />
-      <Route path="/update" element={<UpdateuserA />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/updateProfile" element={<Profileupdate />} />
-      <Route path="/adduser" element={<Adduser />} />
+      {/* User-only routes */}
+      <Route path="/" element={<UserRoute><Home /></UserRoute>} />
+      <Route path="/vehicles" element={<UserRoute><VehicleHome /></UserRoute>} />
+      <Route path="/tours/home" element={<UserRoute><ToursHome /></UserRoute>} />
+      <Route path="/tours/:id" element={<UserRoute><TourDetails /></UserRoute>} />
+      <Route path="/hotelhome" element={<UserRoute><HotelHome /></UserRoute>} />
+      <Route path="/hotel/:id" element={<UserRoute><HotelView /></UserRoute>} />
+      <Route path="/events" element={<UserRoute><FilterActivities /></UserRoute>} />
 
-      {/* Vehicle Management Routes */}
-      <Route path="/vehicles" element={<VehicleHome />} />
-      <Route path="/vehicle" element={<Vehiclelist columns={vehicleColumns} />} />
-      <Route path="/vehicle/add" element={<AddVehicle />} />
-      <Route path="/vehicle/edit/:id" element={<EditVehicle />} />
-      <Route path="/vehicle/view" element={<VehicleView />} />
-      <Route path="/vehicle/book/:id" element={<VehicleBook />} />
-      <Route path="/vehicle/payment" element={<VehiclePayment />} />
+      {/* Protected routes that need specific handling */}
+      <Route path="/vehicle/edit/:id" element={<AdminRoute><EditVehicle /></AdminRoute>} />
+      <Route path="/vehicle/view" element={<UserRoute><VehicleView /></UserRoute>} />
+      <Route path="/vehicle/book/:id" element={<UserRoute><VehicleBook /></UserRoute>} />
+      <Route path="/vehicle/payment" element={<UserRoute><VehiclePayment /></UserRoute>} />
+      
+      {/* Add protection to all other routes as needed */}
       <Route 
         path="/vehiclereservation" 
         element={
-          <ProtectedRoute>
+          <SharedRoute>
             <Vehiclereservation columns={vehicleReservationColumns} />
-          </ProtectedRoute>
+          </SharedRoute>
         }
       />
-
-      {/* //ishara */}
-      <Route path="/tours/home" element={<ToursHome />} />
-      <Route path="/tours/:id" element={<TourDetails />} />
       <Route
         path="/tours/search/:destination/:duration/:maxsize"
-        element={<SearchResults />}
+        element={
+          <UserRoute>
+            <SearchResults />
+          </UserRoute>
+        }
       />
-      <Route path="/addtour" element={<AddTourPackage />} />
-      <Route path="/tour/view" element={<TourView />} />
-      <Route path="/tour/update" element={<UpdateTour />} />
-
-      <Route path="/sunandbeach" element={<AllTourCategories />} />
-      <Route path="/hikingandtrekking" element={<AllTourCategories />} />
-      <Route path="/wildsafari" element={<AllTourCategories />} />
-      <Route path="/special" element={<AllTourCategories />} />
-      <Route path="/cultural" element={<AllTourCategories />} />
-      <Route path="/festival" element={<AllTourCategories />} />
-
+      <Route path="/addtour" element={<AdminRoute><AddTourPackage /></AdminRoute>} />
+      <Route path="/tour/view" element={<AdminRoute><TourView /></AdminRoute>} />
+      <Route path="/tour/update" element={<AdminRoute><UpdateTour /></AdminRoute>} />
+      
+      {/* User Tour Categories */}
+      <Route path="/sunandbeach" element={<UserRoute><AllTourCategories /></UserRoute>} />
+      <Route path="/hikingandtrekking" element={<UserRoute><AllTourCategories /></UserRoute>} />
+      <Route path="/wildsafari" element={<UserRoute><AllTourCategories /></UserRoute>} />
+      <Route path="/special" element={<UserRoute><AllTourCategories /></UserRoute>} />
+      <Route path="/cultural" element={<UserRoute><AllTourCategories /></UserRoute>} />
+      <Route path="/festival" element={<UserRoute><AllTourCategories /></UserRoute>} />
+      
+      {/* Public Route */}
       <Route path="/contactus" element={<ContactUs />} />
-
-      {/* Hansika */}
-      <Route path="/add-new-activity" element={<ActivityForm />} />
-      <Route path="/add-new-activity/:id" element={<ActivityForm />} />
-      <Route path="/pending-activities" element={<PendingActivities />} />
-      <Route
-        path="/pending-reservations"
-        element={<PendingReservationsPage />}
-      />
-      <Route path="/events" element={<FilterActivities />} />
-      <Route path="/activities/:id" element={<Activity />} />
-      <Route path="/my-activities" element={<MyActivities />} />
-      <Route path="/my-reservations" element={<ReservationPage />} />
-
-      {/*sehan*/}
-
-
-
-      {/* navindi */}
-      <Route path="/addrestaurant" element={<RestaurantForm />} />
-
       
+      {/* Admin Activity Management */}
+      <Route path="/add-new-activity" element={<AdminRoute><ActivityForm /></AdminRoute>} />
+      <Route path="/add-new-activity/:id" element={<AdminRoute><ActivityForm /></AdminRoute>} />
+      <Route path="/pending-activities" element={<AdminRoute><PendingActivities /></AdminRoute>} />
+      <Route path="/pending-reservations" element={<AdminRoute><PendingReservationsPage /></AdminRoute>} />
       
-
-      {/* chamith */}
-      <Route path="/hotelhome" element={<HotelHome />} />
-      <Route path="/hotels/new" element={<AddHotel />} />
-      <Route path="/rooms/new/:id" element={<AddRoom />} />
-      <Route path="/hotels/update/:id" element={<UpdateHotel />} />
-      <Route path="/hotel/:id" element={<HotelView />} />
-      <Route path="/hoteloverview/:id" element={<HotelOverView />} />
-      <Route path="/hoteladmin" element={<HadminView />} />
-      <Route path="/hotelreserve/:id" element={<HotelReserve />} />
-      <Route path="/hotelbooking" element={<HotelBook />} />
-
-      {/* Navindi */}
-      <Route path="/addrestaurants" element={<RestaurantForm />} />
-
-      {/*Dinidu*/}
-      <Route path="/finance" element={<Main />} />
-      <Route path="/finance/salary" element={<SalaryCalculation />} />
-      <Route path="/finance/employee" element={<EmployeeList />} />
-      <Route path="/finance/salarySheet" element={<SalarySheet />} />
-      <Route path="/finance/FinanceHealth" element={<FinanceHealth />} />
-      {<Route path="/finance/refund" element={<Refund />} />}
-      {<Route path="finance/addRefund" element={<RefundReq />} />}
-      {<Route path="finance/updateRefund/:id" element={<RefundUpdate />} />}
-
-      {/* Restaurant Management */}
-      <Route path="/restaurant" element={<Restaurantlist />} />
-      <Route path="/addrestaurant" element={<RestaurantForm />} />
-
-      {/* Restaurant routes */}
-      <Route path="/restaurants" element={<Restaurants />} />
-      <Route path="/restaurant" element={<Restaurantlist />} />
-      <Route path="/addrestaurant" element={<RestaurantForm />} />
+      {/* Admin Hotel Management */}
+      <Route path="/addrestaurant" element={<AdminRoute><RestaurantForm /></AdminRoute>} />
+      <Route path="/hotels/new" element={<AdminRoute><AddHotel /></AdminRoute>} />
+      <Route path="/rooms/new/:id" element={<AdminRoute><AddRoom /></AdminRoute>} />
+      <Route path="/hotels/update/:id" element={<AdminRoute><UpdateHotel /></AdminRoute>} />
+      <Route path="/hoteloverview/:id" element={<SharedRoute><HotelOverView /></SharedRoute>} />
+      <Route path="/hoteladmin" element={<AdminRoute><HadminView /></AdminRoute>} />
+      
+      {/* User Hotel Booking */}
+      <Route path="/hotelreserve/:id" element={<UserRoute><HotelReserve /></UserRoute>} />
+      <Route path="/hotelbooking" element={<UserRoute><HotelBook /></UserRoute>} />
+      
+      {/* Admin Restaurant Management */}
+      <Route path="/addrestaurants" element={<AdminRoute><RestaurantForm /></AdminRoute>} />
+      
+      {/* Finance Management - Admin Only */}
+      <Route path="/finance" element={<AdminRoute><Main /></AdminRoute>} />
+      <Route path="/finance/salary" element={<AdminRoute><SalaryCalculation /></AdminRoute>} />
+      <Route path="/finance/employee" element={<AdminRoute><EmployeeList /></AdminRoute>} />
+      <Route path="/finance/salarySheet" element={<AdminRoute><SalarySheet /></AdminRoute>} />
+      <Route path="/finance/FinanceHealth" element={<AdminRoute><FinanceHealth /></AdminRoute>} />
+      <Route path="/finance/refund" element={<AdminRoute><Refund /></AdminRoute>} />
+      <Route path="/finance/addRefund" element={<AdminRoute><RefundReq /></AdminRoute>} />
+      <Route path="/finance/updateRefund/:id" element={<AdminRoute><RefundUpdate /></AdminRoute>} />
+      
+      {/* Restaurant Routes */}
+      <Route path="/restaurant" element={<AdminRoute><Restaurantlist /></AdminRoute>} />
+      <Route path="/restaurants" element={<UserRoute><Restaurants /></UserRoute>} />
     </Routes>
   );
 };

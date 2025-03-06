@@ -54,19 +54,28 @@ const loginUser = async (req, res, next) => {
       return res.status(404).send("wrong password");
     }
 
-    //create the token
+    // Create token with user ID and admin status
     const token = jwt.sign(
-      { id: user, isAdmin: user.isAdmin },
-      process.env.JWT
+      { id: user._id, isAdmin: user.isAdmin },
+      process.env.JWT || 'mekarahasak'
     );
 
-    const { password, isAdmin, ...otherDetails } = user._doc;
+    // Separate password from user data
+    const { password, ...otherDetails } = user._doc;
+
     res
       .cookie("access_token", token, {
         httpOnly: true,
       })
       .status(200)
-      .json({ details: { ...otherDetails }, isAdmin, token });
+      .json({
+        details: {
+          ...otherDetails,
+          isAdmin: user.isAdmin  // Include isAdmin in details
+        },
+        isAdmin: user.isAdmin,
+        token
+      });
   } catch (error) {
     next(error);
   }

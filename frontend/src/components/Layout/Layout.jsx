@@ -10,37 +10,50 @@ const Layout = () => {
   const { user } = useContext(AuthContext);
   const location = useLocation();
 
-  // to render the alternative Navbar or the default Navbar
-  const showAdminNavbar =
-    location.pathname === "/admin" ||
-    location.pathname === "/users" ||
-    location.pathname === "/hotels" ||
-    location.pathname === "/tours" ||
-    location.pathname === "/vehicle" ||
-    location.pathname === "/train" ||
-    location.pathname === "/adduser" ||
-    location.pathname === "/userpage" ||
-    location.pathname === "/update";
+  // List of routes that should use admin layout
+  const adminRoutes = [
+    '/admin',
+    '/users',
+    '/hotels',
+    '/tours',
+    '/vehicle',
+    '/train',
+    '/adduser',
+    '/userpage',
+    '/update',
+    '/profile',  // Profile will use admin layout for admin users
+    '/updateProfile'
+  ];
 
-  const showFinaceNavbar =
-    location.pathname === "/finace" ||
-    location.pathname === "/finance/salary" ||
-    location.pathname === "/finance/employee" ||
-    location.pathname === "/finance/salarySheet" ||
-    location.pathname === "/finance/FinanceHealth" ||
-    location.pathname === "/finance/refund" ||
-    location.pathname === "/finance/addRefund" ||
-    location.pathname === "/finance/updateRefund/:id";
+  // List of routes that should use finance layout
+  const financeRoutes = [
+    '/finance',
+    '/finance/salary',
+    '/finance/employee',
+    '/finance/salarySheet',
+    '/finance/FinanceHealth',
+    '/finance/refund',
+    '/finance/addRefund',
+    '/finance/updateRefund'
+  ];
+
+  // Determine which layout to show based on user type and current route
+  const shouldShowAdminLayout = () => {
+    if (!user) return false;
+    if (user.isAdmin) {
+      // Admin users should always see admin layout
+      return true;
+    }
+    if (user.type === "financeManager") {
+      // Finance managers see admin layout only on finance routes
+      return financeRoutes.some(route => location.pathname.startsWith(route));
+    }
+    return false;
+  };
 
   return (
     <div>
-      {showAdminNavbar ? (
-        <AdminNavbar />
-      ) : showFinaceNavbar ? (
-        <AdminNavbar />
-      ) : (
-        <Navbar />
-      )}
+      {shouldShowAdminLayout() ? <AdminNavbar /> : <Navbar />}
       <RouteTour />
       <Footer />
     </div>
