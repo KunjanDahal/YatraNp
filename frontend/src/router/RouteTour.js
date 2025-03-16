@@ -75,6 +75,8 @@ import { FinanceHealth } from "../pages/FinanceHealth";
 import RestaurantForm from "../pages/Restaturant/RestaurantForm";
 import Restaurantlist from "../pages/Restaurantlist";
 import Restaurants from "../pages/Restaurants";
+import PaymentSuccess from "../pages/payment/PaymentSuccess";
+import KhaltiPaymentExample from "../pages/payment/KhaltiPaymentExample";
 
 const RouteTour = () => {
   const { user } = useContext(AuthContext);
@@ -181,6 +183,10 @@ const RouteTour = () => {
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      
+      {/* Payment routes */}
+      <Route path="/payment/success" element={<SharedRoute><PaymentSuccess /></SharedRoute>} />
+      <Route path="/payment/example" element={<SharedRoute><KhaltiPaymentExample /></SharedRoute>} />
 
       {/* Shared routes - different layout based on user type */}
       <Route path="/profile" element={<SharedRoute><Profile /></SharedRoute>} />

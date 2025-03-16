@@ -16,6 +16,8 @@ const { createImagesDirectory } = require('./config/init');
 const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/authRoutes");
 const activityRoutes = require("./routes/activityRoute");
+const paymentRoutes = require("./routes/paymentRoutes");
+const khaltiRoutes = require("./routes/khaltiRoutes");
 
 // Initialize Express app
 const app = express();
@@ -64,6 +66,8 @@ app.use("/images", express.static(path.join(__dirname, "images")));
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/activities", activityRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/khalti", khaltiRoutes);
 
 //tour
 const tourRouter = require("./routes/tourRouter");

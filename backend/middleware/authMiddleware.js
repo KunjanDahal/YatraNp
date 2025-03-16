@@ -2,6 +2,15 @@ const jwt = require('jsonwebtoken');
 //normal user
 const User = require('../models/userModel.js');
 
+// Debug middleware to print auth headers
+const debugAuthMiddleware = (req, res, next) => {
+  console.log('Debug Auth Middleware:');
+  console.log('Headers:', req.headers);
+  console.log('Cookies:', req.cookies);
+  console.log('Auth header:', req.headers.authorization);
+  next();
+};
+
 const getTokenFromRequest = (req) => {
   // First try to get token from Authorization header
   const authHeader = req.headers.authorization;
@@ -37,49 +46,66 @@ const verifyJWT = (token) => {
 
 const userMiddleware = async (req, res, next) => {
   try {
-    const token = getTokenFromRequest(req);
-    if (!token) {
-      return res.status(401).json({ 
+    console.log('User Middleware - Checking Authentication');
+    
+    // Check for token in cookies
+    const token = req.cookies.access_token;
+    console.log('Token from cookies:', token ? 'Found' : 'Not found');
+    
+    // Check for token in authorization header
+    const authHeader = req.headers.authorization;
+    console.log('Authorization header:', authHeader ? authHeader : 'Not found');
+    
+    if (!token && !authHeader) {
+      console.log('No authentication token found in cookies or headers');
+      return res.status(401).json({
         success: false,
-        message: 'No token provided' 
+        message: "You are not authenticated. Please login."
       });
     }
-
-    const decoded = verifyJWT(token);
-    if (!decoded || !decoded.id) {
-      return res.status(401).json({ 
+    
+    // Extract token from header if present
+    let tokenFromHeader = null;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      tokenFromHeader = authHeader.split(' ')[1];
+      console.log('Token extracted from header');
+    }
+    
+    // Use token from header or cookie
+    const tokenToVerify = tokenFromHeader || token;
+    console.log('Using token for verification:', tokenToVerify ? 'Found' : 'Not found');
+    
+    if (!tokenToVerify) {
+      console.log('No valid token found after extraction');
+      return res.status(401).json({
         success: false,
-        message: 'Invalid token format' 
+        message: "Invalid authentication token format"
       });
     }
-
+    
+    // Verify the token
+    const decoded = jwt.verify(tokenToVerify, process.env.JWT);
+    console.log('Token verified, decoded payload:', decoded);
+    
+    // Check if the user exists
     const user = await User.findById(decoded.id);
     if (!user) {
-      return res.status(401).json({ 
+      console.log('User not found with ID:', decoded.id);
+      return res.status(401).json({
         success: false,
-        message: 'User not found' 
+        message: "User not found"
       });
     }
-
+    
+    console.log('User authenticated successfully:', user._id.toString());
     req.user = user;
     next();
-  } catch (err) {
-    console.error('User middleware error:', err);
-    if (err.name === 'JsonWebTokenError') {
-      return res.status(401).json({ 
-        success: false,
-        message: 'Invalid token format' 
-      });
-    }
-    if (err.name === 'TokenExpiredError') {
-      return res.status(401).json({ 
-        success: false,
-        message: 'Token has expired' 
-      });
-    }
-    return res.status(401).json({ 
+  } catch (error) {
+    console.error('Authentication error:', error.name, error.message);
+    return res.status(401).json({
       success: false,
-      message: 'Authentication failed' 
+      message: "Authentication failed: " + error.message,
+      error: error.name
     });
   }
 };
@@ -211,5 +237,6 @@ module.exports = {
   userMiddleware,
   adminMiddleware,
   organizerMiddleware,
-  eventManagementMiddleware
+  eventManagementMiddleware,
+  debugAuthMiddleware
 };
