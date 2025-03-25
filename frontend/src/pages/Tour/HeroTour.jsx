@@ -3,9 +3,11 @@ import SearchBar from "./SearchBar";
 
 const image = {
   backgroundImage:
-    "url('https://firebasestorage.googleapis.com/v0/b/travely-7264c.appspot.com/o/header%20photo.jpg?alt=media&token=81dbb6a1-7b18-473d-a151-dbe0a59e8bb7')",
+    "url('https://images.pexels.com/photos/950058/pexels-photo-950058.jpeg')",
   height: "500px",
-  backgroundPosition: "50%",
+  backgroundPosition: "center",
+  backgroundSize: "cover",
+  position: "relative",
 };
 
 const HeroTour = () => {
@@ -14,16 +16,18 @@ const HeroTour = () => {
     <div>
       <div className="">
         <div
-          class="relative overflow-hidden bg-no-repeat bg-cover "
+          className="relative overflow-hidden bg-no-repeat bg-cover"
           style={image}
         >
-          <div class="flex h-full items-center justify-center text-center">
+          <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+          <div className="flex h-full items-center justify-center text-center relative z-10">
             <div>
               <h2
-                class="mb-5  text-6xl font-bold text-black "
+                className="mb-5 text-6xl font-bold text-white"
                 style={{
                   fontFamily: "Poppins, sans-serif",
                   fontWeight: "bolder",
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
                 }}
               >
                 Do More With YatraNp
@@ -31,15 +35,16 @@ const HeroTour = () => {
               <div>
                 <div className="mt-12 w-1/2 mr-auto ml-auto">
                   <h4
-                    class="mt-5 mb-6 text-xl  uppercase animate-bounce text-white text-center"
+                    className="mt-5 mb-6 text-xl uppercase animate-bounce text-white text-center"
                     style={{
                       fontFamily: "Poppins, sans-serif",
                       fontWeight: "normal",
-                      border: "solid 1px  white",
-                      textShadow: "3px 1px black",
+                      border: "solid 1px white",
+                      textShadow: "2px 2px 4px rgba(0,0,0,0.8)",
+                      padding: "10px"
                     }}
                   >
-                    Discover Nepal
+                    DISCOVER NEPAL
                   </h4>
                 </div>
               </div>
