@@ -60,6 +60,7 @@ const Tourlist = ({ columns }) => {
         setLoadingRequests(true);
         const res = await axios.post(`/api/tours/customform/respond/${id}`, {
           response,
+          includeResponseInNotification: true,
         });
         
         if (res.data.status === "success") {

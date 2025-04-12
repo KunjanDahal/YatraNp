@@ -112,12 +112,21 @@ const respondToForm = async (req, res) => {
     
     // Create notification for user
     try {
+      // Format the response to be included in the notification
+      const responsePreview = req.body.response.length > 100 
+        ? `${req.body.response.substring(0, 100)}...` 
+        : req.body.response;
+      
       const notification = {
         userId: updatedForm.currentUserId || "unknown",
         userEmail: updatedForm.currentUser,
-        message: `Your tour request from ${updatedForm.whereFrom} to ${updatedForm.whereTo} has received a response.`,
+        message: `Your tour request from ${updatedForm.whereFrom} to ${updatedForm.whereTo} has received a response: "${responsePreview}"`,
         type: "tour_request",
-        linkTo: "/profile" // Link to view responses
+        linkTo: "/profile", // Link to view responses
+        details: {
+          fullResponse: req.body.response,
+          tourRequestId: updatedForm._id
+        }
       };
       
       // Create notification

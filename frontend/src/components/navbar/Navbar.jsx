@@ -187,9 +187,9 @@ const Navbar = () => {
               </button>
 
               {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg overflow-hidden z-20">
-                  <div className="px-4 py-2 bg-gray-50 flex justify-between items-center">
-                    <h3 className="text-lg font-medium text-gray-700">Notifications</h3>
+                <div className="absolute right-0 mt-2 w-96 bg-white rounded-md shadow-lg overflow-hidden z-20">
+                  <div className="px-4 py-3 bg-gray-50 flex justify-between items-center">
+                    <h3 className="text-lg font-semibold text-gray-700">Notifications</h3>
                     {unreadCount > 0 && (
                       <button
                         onClick={handleMarkAllAsRead}
@@ -212,14 +212,34 @@ const Navbar = () => {
                             if (!notification.read) {
                               handleMarkAsRead(notification._id);
                             }
-                            if (notification.linkTo) {
+                            if (notification.linkTo && !notification.details?.fullResponse) {
                               navigate(notification.linkTo);
                             }
                           }}
-                          className={`px-4 py-3 hover:bg-gray-50 cursor-pointer ${!notification.read ? 'bg-blue-50' : ''}`}
+                          className={`p-4 hover:bg-gray-50 ${!notification.read ? 'bg-blue-50' : ''}`}
                         >
-                          <p className="text-sm text-gray-800">{notification.message}</p>
-                          <p className="text-xs text-gray-500 mt-1">
+                          {notification.type === "tour_request" && notification.details?.fullResponse ? (
+                            <div>
+                              <p className="text-sm text-gray-700">
+                                Your tour request from <span className="font-medium">{notification.message.split(" to ")[0].split("from ")[1]}</span> to <span className="font-medium">{notification.message.split(" to ")[1].split(" has")[0]}</span> has received a response.
+                              </p>
+                              
+                              <details className="mt-3 bg-white rounded-md border border-gray-200">
+                                <summary className="p-3 text-sm text-blue-600 cursor-pointer font-medium hover:bg-blue-50 rounded-t-md">
+                                  View Response
+                                </summary>
+                                <div className="p-3 bg-gray-50 rounded-b-md border-t border-gray-200">
+                                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                                    {notification.details.fullResponse}
+                                  </p>
+                                </div>
+                              </details>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-800">{notification.message}</p>
+                          )}
+                          
+                          <p className="text-xs text-gray-500 mt-3">
                             {new Date(notification.createdAt).toLocaleString()}
                           </p>
                         </div>
