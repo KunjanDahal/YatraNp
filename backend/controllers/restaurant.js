@@ -1,4 +1,5 @@
 const Restaurant = require("../models/Restaurant");
+const mongoose = require("mongoose");
 
 // Create a new restaurant
 const createRestaurant = async (req, res) => {
@@ -92,10 +93,27 @@ const deleteRestaurant = async (req, res) => {
 // Get restaurant by ID
 const getRestaurant = async (req, res) => {
     try {
+        console.log("Getting restaurant with ID:", req.params.id);
+        
         const restaurant = await Restaurant.findById(req.params.id);
+        
+        if (!restaurant) {
+            console.log("Restaurant not found with ID:", req.params.id);
+            return res.status(404).json({ 
+                success: false, 
+                message: "Restaurant not found" 
+            });
+        }
+        
+        console.log("Restaurant found:", restaurant.name);
         res.status(200).json(restaurant);
     } catch (err) {
-        res.status(500).json(err);
+        console.error("Error getting restaurant:", err);
+        res.status(500).json({
+            success: false,
+            message: "Failed to get restaurant details",
+            error: err.message
+        });
     }
 };
 
@@ -120,11 +138,65 @@ const getRestaurantsByCity = async (req, res) => {
     }
 };
 
+// Get count of restaurants for dashboard
+const getRestaurantCount = async (req, res) => {
+  try {
+    const count = await Restaurant.countDocuments();
+    res.status(200).json({ count });
+  } catch (err) {
+    console.error("Error getting restaurant count:", err);
+    res.status(500).json({ message: "Error getting restaurant count", error: err.message });
+  }
+};
+
+// Get monthly restaurant bookings for dashboard
+const getMonthlyBookings = async (req, res) => {
+  try {
+    // Use the RestaurantReservation model
+    const RestaurantReservation = mongoose.model("RestaurantReservation");
+    
+    const pipeline = [
+      {
+        $project: {
+          month: { $month: "$createdAt" },
+          year: { $year: "$createdAt" }
+        }
+      },
+      {
+        $group: {
+          _id: { month: "$month", year: "$year" },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { "_id.year": -1, "_id.month": -1 }
+      }
+    ];
+
+    const bookings = await RestaurantReservation.aggregate(pipeline);
+    
+    // Transform data to include month names
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const result = bookings.map(booking => ({
+      month: months[booking._id.month - 1],
+      year: booking._id.year,
+      count: booking.count
+    }));
+    
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("Error getting monthly bookings:", err);
+    res.status(500).json({ message: "Error getting monthly bookings", error: err.message });
+  }
+};
+
 module.exports = {
     createRestaurant,
     updateRestaurant,
     deleteRestaurant,
     getRestaurant,
     getAllRestaurants,
-    getRestaurantsByCity
+    getRestaurantsByCity,
+    getRestaurantCount,
+    getMonthlyBookings
 }; 

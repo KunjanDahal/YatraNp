@@ -7,37 +7,35 @@ const tourReviewController = require("../controllers/tourReviewController");
 //define route handler
 const router = express.Router();
 
-//tour routes
-router
-  .route("/")
-  .post(tourController.createTour)
-  .get(tourController.getAllTours);
-
-router
-  .route("/:id")
-  .get(tourController.getTour)
-  .patch(tourController.updateTour)
-  .delete(tourController.deleteTour);
-
-//custom form routes
-router.route("/customform").post(tourCustomForm.createForm);
-router.route("/customform/all").get(tourCustomForm.getAllForms);
-router.route("/customform/:id").patch(tourCustomForm.updateForm).delete(tourCustomForm.deleteForm);
-router.route("/customform/respond/:id").post(tourCustomForm.respondToForm);
+// Analytics routes for dashboard - must be placed before generic routes
+router.get("/count", tourController.getTourCount);
+router.get("/bookings/monthly", tourController.getMonthlyBookings);
 
 // Tour Review routes
-router.route("/reviews/check-collection").get(tourReviewController.checkCollectionExists);
-router.route("/reviews/ratings").get(tourReviewController.getAllToursRatings);
-router.route("/reviews/:tourId").get(tourReviewController.getTourReviews);
-router.route("/reviews/:tourId").post(tourReviewController.createReview);
-router.route("/reviews/update/:reviewId").patch(tourReviewController.updateReview);
-router.route("/reviews/delete/:reviewId").delete(tourReviewController.deleteReview);
+router.get("/reviews/check-collection", tourReviewController.checkCollectionExists);
+router.get("/reviews/ratings", tourReviewController.getAllToursRatings);
+router.get("/reviews/:tourId", tourReviewController.getTourReviews);
+router.post("/reviews/:tourId", tourReviewController.createReview);
+router.patch("/reviews/update/:reviewId", tourReviewController.updateReview);
+router.delete("/reviews/delete/:reviewId", tourReviewController.deleteReview);
 
-// router.route("/tt").post(tourReservation.getAllReservations);
+//custom form routes
+router.post("/customform", tourCustomForm.createForm);
+router.get("/customform/all", tourCustomForm.getAllForms);
+router.patch("/customform/:id", tourCustomForm.updateForm);
+router.delete("/customform/:id", tourCustomForm.deleteForm);
+router.post("/customform/respond/:id", tourCustomForm.respondToForm);
+
 //reserve form
-router
-  .route("/tourReservations")
-  .put(tourReservation.getAllReservations)
-  .post(tourReservation.bookTour);
+router.put("/tourReservations", tourReservation.getAllReservations);
+router.post("/tourReservations", tourReservation.bookTour);
+
+//tour routes - more generic routes should be at the end
+router.post("/", tourController.createTour);
+router.get("/", tourController.getAllTours);
+
+router.get("/:id", tourController.getTour);
+router.patch("/:id", tourController.updateTour);
+router.delete("/:id", tourController.deleteTour);
 
 module.exports = router;

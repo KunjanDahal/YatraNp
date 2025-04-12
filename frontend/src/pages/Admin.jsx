@@ -1,6 +1,7 @@
-import { useContext } from "react";
+import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/authContext";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import backgroundImage from "../assets/images/bg.jpg";
 import React from "react";
 import {
@@ -19,58 +20,6 @@ import {
   Bar,
 } from "recharts";
 import { FaUsers, FaHotel, FaCar, FaRoute, FaUtensils, FaCalendarAlt, FaBookmark, FaCog } from 'react-icons/fa';
-
-const data = [
-  {
-    name: "Page A",
-    uv: 4000,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "Page B",
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
-  },
-  {
-    name: "Page C",
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: "Page D",
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
-  },
-  {
-    name: "Page E",
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
-  },
-  {
-    name: "Page F",
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Page G",
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-];
-
-const data2 = [
-  { name: "Users", value: 800 },
-  { name: "Hotels", value: 300 },
-  { name: "Vehicles", value: 300 },
-  { name: "Tours", value: 200 },
-];
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
@@ -103,6 +52,159 @@ const renderCustomizedLabel = ({
 
 const Admin = () => {
   const { user } = useContext(AuthContext);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [distributionData, setDistributionData] = useState([]);
+  const [activityData, setActivityData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Set default counts
+        let userCount = 0;
+        let hotelCount = 0;
+        let vehicleCount = 0;
+        let tourCount = 0;
+        let restaurantCount = 0;
+        
+        // Fetch counts for distribution chart, with individual error handling
+        try {
+          const usersRes = await axios.get('/api/users/count');
+          userCount = usersRes.data.count || 0;
+        } catch (err) {
+          console.error("Error fetching user count:", err);
+        }
+        
+        try {
+          const hotelsRes = await axios.get('/api/hotels/count');
+          hotelCount = hotelsRes.data.count || 0;
+        } catch (err) {
+          console.error("Error fetching hotel count:", err);
+        }
+        
+        try {
+          const vehiclesRes = await axios.get('/api/vehicle/count');
+          vehicleCount = vehiclesRes.data.count || 0;
+        } catch (err) {
+          console.error("Error fetching vehicle count:", err);
+        }
+        
+        try {
+          const toursRes = await axios.get('/api/tours/count');
+          tourCount = toursRes.data.count || 0;
+        } catch (err) {
+          console.error("Error fetching tour count:", err);
+        }
+        
+        try {
+          const restaurantsRes = await axios.get('/api/restaurant/count');
+          restaurantCount = restaurantsRes.data.count || 0;
+        } catch (err) {
+          console.error("Error fetching restaurant count:", err);
+        }
+
+        // Create distribution data
+        const distribution = [
+          { name: "Users", value: userCount },
+          { name: "Hotels", value: hotelCount },
+          { name: "Vehicles", value: vehicleCount },
+          { name: "Tours", value: tourCount },
+          { name: "Restaurants", value: restaurantCount }
+        ];
+        
+        // For bookings data, use default data if API fails
+        let hotelBookings = [];
+        let vehicleBookings = [];
+        let tourBookings = [];
+        let restaurantBookings = [];
+        
+        try {
+          const hotelBookingsRes = await axios.get('/api/hotels/bookings/monthly');
+          hotelBookings = hotelBookingsRes.data || [];
+        } catch (err) {
+          console.error("Error fetching hotel bookings:", err);
+        }
+        
+        try {
+          const vehicleBookingsRes = await axios.get('/api/vehicle/bookings/monthly');
+          vehicleBookings = vehicleBookingsRes.data || [];
+        } catch (err) {
+          console.error("Error fetching vehicle bookings:", err);
+        }
+        
+        try {
+          const tourBookingsRes = await axios.get('/api/tours/bookings/monthly');
+          tourBookings = tourBookingsRes.data || [];
+        } catch (err) {
+          console.error("Error fetching tour bookings:", err);
+        }
+        
+        try {
+          const restaurantBookingsRes = await axios.get('/api/restaurants/bookings/monthly');
+          restaurantBookings = restaurantBookingsRes.data || [];
+        } catch (err) {
+          console.error("Error fetching restaurant bookings:", err);
+        }
+
+        // Process data for activity chart - last 6 months
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const currentMonth = new Date().getMonth();
+        
+        // Get last 6 months
+        const lastSixMonths = Array.from({length: 6}, (_, i) => {
+          const monthIndex = (currentMonth - i + 12) % 12;
+          return months[monthIndex];
+        }).reverse();
+        
+        // Create activity data for the chart
+        const activity = lastSixMonths.map((month, index) => {
+          // Find the corresponding month data in each result
+          const hotelData = hotelBookings.find(item => item.month === month) || { count: 0 };
+          const vehicleData = vehicleBookings.find(item => item.month === month) || { count: 0 };
+          const tourData = tourBookings.find(item => item.month === month) || { count: 0 };
+          const restaurantData = restaurantBookings.find(item => item.month === month) || { count: 0 };
+          
+          return {
+            name: month,
+            hotels: hotelData.count,
+            vehicles: vehicleData.count,
+            tours: tourData.count,
+            restaurants: restaurantData.count
+          };
+        });
+        
+        setDistributionData(distribution);
+        setActivityData(activity);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching analytics data:", err);
+        setError("Failed to load analytics data");
+        setLoading(false);
+        
+        // Set fallback data if API calls fail
+        setDistributionData([
+          { name: "Users", value: 123 },
+          { name: "Hotels", value: 45 },
+          { name: "Vehicles", value: 38 },
+          { name: "Tours", value: 27 },
+          { name: "Restaurants", value: 19 }
+        ]);
+        
+        setActivityData([
+          { name: "Jul", hotels: 25, vehicles: 15, tours: 10, restaurants: 5 },
+          { name: "Aug", hotels: 30, vehicles: 20, tours: 15, restaurants: 10 },
+          { name: "Sep", hotels: 28, vehicles: 22, tours: 12, restaurants: 8 },
+          { name: "Oct", hotels: 35, vehicles: 25, tours: 18, restaurants: 12 },
+          { name: "Nov", hotels: 40, vehicles: 30, tours: 22, restaurants: 15 },
+          { name: "Dec", hotels: 45, vehicles: 35, tours: 25, restaurants: 18 }
+        ]);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -220,65 +322,87 @@ const Admin = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Bar Chart */}
               <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Activity Overview</h3>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={data}
-                      margin={{
-                        top: 5,
-                        right: 30,
-                        left: 20,
-                        bottom: 5,
-                      }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="pv" fill="#4F46E5" />
-                      <Bar dataKey="uv" fill="#10B981" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Bookings Overview (Last 6 Months)</h3>
+                {loading ? (
+                  <div className="h-80 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                  </div>
+                ) : error ? (
+                  <div className="h-80 flex items-center justify-center">
+                    <p className="text-red-500">{error}</p>
+                  </div>
+                ) : (
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={activityData}
+                        margin={{
+                          top: 5,
+                          right: 30,
+                          left: 20,
+                          bottom: 5,
+                        }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="hotels" name="Hotels" fill="#00C49F" />
+                        <Bar dataKey="vehicles" name="Vehicles" fill="#FFBB28" />
+                        <Bar dataKey="tours" name="Tours" fill="#FF8042" />
+                        <Bar dataKey="restaurants" name="Restaurants" fill="#0088FE" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
               </div>
 
               {/* Pie Chart */}
               <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Distribution Overview</h3>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={data2}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={renderCustomizedLabel}
-                        outerRadius={150}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {data2.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="grid grid-cols-4 gap-2 mt-4">
-                    {data2.map((item, index) => (
-                      <div key={index} className="flex items-center">
-                        <div
-                          className="w-3 h-3 rounded-full mr-2"
-                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                        ></div>
-                        <span className="text-sm text-gray-600">{item.name}</span>
-                      </div>
-                    ))}
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Service Distribution</h3>
+                {loading ? (
+                  <div className="h-80 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                   </div>
-                </div>
+                ) : error ? (
+                  <div className="h-80 flex items-center justify-center">
+                    <p className="text-red-500">{error}</p>
+                  </div>
+                ) : (
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={distributionData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={renderCustomizedLabel}
+                          outerRadius={150}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {distributionData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mt-4">
+                      {distributionData.map((item, index) => (
+                        <div key={index} className="flex items-center">
+                          <div
+                            className="w-3 h-3 rounded-full mr-2"
+                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                          ></div>
+                          <span className="text-sm text-gray-600">{item.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

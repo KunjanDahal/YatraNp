@@ -80,6 +80,7 @@ const FilterActivities = () => {
   const [activities, setActivities] = useState([]);
   const [activityType, setActivityType] = useState('');
   const [loading, setLoading] = useState(false);
+  const [allActivities, setAllActivities] = useState([]);
 
   useEffect(() => {
     fetchActivities();
@@ -98,6 +99,7 @@ const FilterActivities = () => {
       
       if (response.data && response.data.success && response.data.activities) {
         setActivities(response.data.activities);
+        setAllActivities(response.data.activities);
       } else {
         // Fallback to approved activities endpoint
         const fallbackResponse = await axios.get('/api/activities/public');
@@ -106,6 +108,7 @@ const FilterActivities = () => {
         
         if (fallbackResponse.data && fallbackResponse.data.activities) {
           setActivities(fallbackResponse.data.activities);
+          setAllActivities(fallbackResponse.data.activities);
         } else {
           throw new Error('No activities found in API response');
         }
@@ -121,6 +124,7 @@ const FilterActivities = () => {
         
         if (fullUrlResponse.data && fullUrlResponse.data.activities) {
           setActivities(fullUrlResponse.data.activities);
+          setAllActivities(fullUrlResponse.data.activities);
         } else {
           throw new Error('No activities found in full URL response');
         }
@@ -135,6 +139,7 @@ const FilterActivities = () => {
         });
         
         setActivities([]);
+        setAllActivities([]);
       }
     } finally {
       setLoading(false);
@@ -144,13 +149,13 @@ const FilterActivities = () => {
   const handleSearch = () => {
     // Filter activities locally based on search query and type
     if (!searchQuery && !activityType) {
-      // If no filters, fetch all activities
-      fetchActivities();
+      // If no filters, show all activities
+      setActivities(allActivities);
       return;
     }
     
-    // Clone the current activities for filtering
-    let filteredActivities = [...activities];
+    // Start with all fetched activities
+    let filteredActivities = [...allActivities];
     
     // Apply search query filter if provided
     if (searchQuery) {
@@ -170,6 +175,36 @@ const FilterActivities = () => {
     
     // Update state with filtered activities
     setActivities(filteredActivities);
+  };
+
+  const handleTypeChange = (event) => {
+    const selectedType = event.target.value === 'ALL' ? '' : event.target.value;
+    setActivityType(selectedType);
+    
+    // Filter immediately when type changes
+    setTimeout(() => {
+      // Start with all fetched activities
+      let filteredActivities = [...allActivities];
+      
+      // Apply search query filter if provided
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filteredActivities = filteredActivities.filter(activity => 
+          (activity.name && activity.name.toLowerCase().includes(query)) ||
+          (activity.description && activity.description.toLowerCase().includes(query))
+        );
+      }
+      
+      // Apply the newly selected activity type
+      if (selectedType) {
+        filteredActivities = filteredActivities.filter(activity => 
+          activity.type === selectedType
+        );
+      }
+      
+      // Update state with filtered activities
+      setActivities(filteredActivities);
+    }, 0);
   };
 
   return (
@@ -224,12 +259,8 @@ const FilterActivities = () => {
             <label className='block font-medium mb-2'>Activity Type</label>
             <select
               className='border rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500'
-              value={activityType}
-              onChange={(event) =>
-                event.target.value === 'ALL'
-                  ? setActivityType('')
-                  : setActivityType(event.target.value)
-              }
+              value={activityType ? activityType : 'ALL'}
+              onChange={handleTypeChange}
             >
               <option value='ALL'>ALL</option>
               <option value='INDOOR'>Indoor</option>
@@ -241,12 +272,6 @@ const FilterActivities = () => {
             onClick={handleSearch}
           >
             Apply Filters
-          </button>
-          <button
-            className='mt-2 bg-gray-200 text-gray-800 px-4 py-2 rounded-lg w-full hover:bg-gray-300'
-            onClick={fetchActivities}
-          >
-            Reset Filters
           </button>
         </div>
         <div className='w-3/4'>

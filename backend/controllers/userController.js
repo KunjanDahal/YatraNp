@@ -54,9 +54,21 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+// Get count of users for dashboard
+const getUserCount = async (req, res) => {
+  try {
+    const count = await User.countDocuments();
+    res.status(200).json({ count });
+  } catch (err) {
+    console.error("Error getting user count:", err);
+    res.status(500).json({ message: "Error getting user count", error: err.message });
+  }
+};
+
 module.exports = {
   updateUser,
   deleteUser,
   getUser,
   getAllUsers,
+  getUserCount
 };

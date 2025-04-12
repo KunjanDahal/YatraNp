@@ -1,11 +1,38 @@
 const mongoose = require("mongoose");
 
-// Create a simple schema for testing
+// Create a schema for restaurant reservations
 const restaurantReservationSchema = new mongoose.Schema({
-  userName: String,
-  reservationDate: Date,
-  guests: Number,
-  phone: String,
+  restaurantId: {
+    type: String,
+    required: true
+  },
+  restaurantName: {
+    type: String,
+    required: true
+  },
+  userId: {
+    type: String,
+    required: true
+  },
+  userName: {
+    type: String,
+    required: true
+  },
+  userEmail: {
+    type: String,
+    required: true
+  },
+  userPhone: String,
+  reservationDate: {
+    type: Date,
+    required: true
+  },
+  guests: {
+    type: Number,
+    required: true,
+    min: 1
+  },
+  notes: String,
   status: {
     type: String,
     enum: ["PENDING", "APPROVED", "DECLINED"],
@@ -119,8 +146,73 @@ const declineReservation = async (req, res) => {
   }
 };
 
+// Create a new restaurant reservation
+const createReservation = async (req, res) => {
+  try {
+    console.log("Creating restaurant reservation with data:", req.body);
+    
+    // Extract data from request body
+    const {
+      restaurantId,
+      restaurantName,
+      userId,
+      userName,
+      userEmail,
+      userPhone,
+      date,
+      time,
+      guests,
+      notes
+    } = req.body;
+    
+    // Validate required fields
+    if (!restaurantId || !userName || !date || !time || !guests) {
+      return res.status(400).json({
+        status: "unsuccess",
+        message: "Missing required fields for reservation",
+      });
+    }
+    
+    // Parse date and time to create a proper date object
+    const reservationDateTime = new Date(`${date}T${time}`);
+    
+    // Create reservation document
+    const newReservation = new RestaurantReservation({
+      restaurantId,
+      restaurantName,
+      userId,
+      userName,
+      userEmail,
+      userPhone,
+      reservationDate: reservationDateTime,
+      guests: parseInt(guests),
+      notes,
+      status: "PENDING"
+    });
+    
+    // Save to database
+    const savedReservation = await newReservation.save();
+    console.log("Restaurant reservation created successfully:", savedReservation);
+    
+    res.status(201).json({
+      status: "success",
+      message: "Restaurant reservation created successfully",
+      data: {
+        reservation: savedReservation,
+      },
+    });
+  } catch (err) {
+    console.log("Error creating reservation:", err);
+    res.status(400).json({
+      status: "unsuccess",
+      message: err.message,
+    });
+  }
+};
+
 module.exports = { 
   getAllReservations,
+  createReservation,
   approveReservation,
   declineReservation
 }; 

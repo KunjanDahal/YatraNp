@@ -50,7 +50,7 @@ import EditVehicle from "../pages/vehicle/EditVehicle";
 import HotelView from "../components/hotel/HotelView";
 import VehicleView from "../pages/vehicle/VehicleView";
 
-import RestaurentForm from "../pages/Restaturant/RestaurantForm";
+import RestaurentForm from "../pages/Restaturant_admin/RestaurantForm";
 import HadminView from "../pages/hotel/HadminView";
 import HotelReserve from "../components/hotel/HotelReserve";
 import Hotellist from "../pages/Hotellist";
@@ -71,12 +71,14 @@ import { SalaryCalculation } from "../pages/SalaryCalculation";
 import { EmployeeList } from "../pages/EmployeeList";
 import { SalarySheet } from "../pages/SalarySheet";
 import { FinanceHealth } from "../pages/FinanceHealth";
-import RestaurantForm from "../pages/Restaturant/RestaurantForm";
+import RestaurantForm from "../pages/Restaturant_admin/RestaurantForm";
 import Restaurantlist from "../pages/Restaurantlist";
 import Restaurants from "../pages/Restaurants";
 import PaymentSuccess from "../pages/payment/PaymentSuccess";
 import KhaltiPaymentExample from "../pages/payment/KhaltiPaymentExample";
 import HotelReservations from '../pages/HotelReservations';
+import RestaurantDetails from "../pages/Restaurant/RestaurantDetails";
+import RestaurantReservations from "../pages/Restaurant/RestaurantReservations";
 
 const RouteTour = () => {
   const { user } = useContext(AuthContext);
@@ -218,6 +220,9 @@ const RouteTour = () => {
       <Route path="/vehicle/book/:id" element={<UserRoute><VehicleBook /></UserRoute>} />
       <Route path="/vehicle/payment" element={<UserRoute><VehiclePayment /></UserRoute>} />
       
+      {/* Activity Routes */}
+      <Route path="/activities/:id" element={<SharedRoute><Activity /></SharedRoute>} />
+      
       {/* Add protection to all other routes as needed */}
       <Route 
         path="/vehiclereservation" 
@@ -312,6 +317,8 @@ const RouteTour = () => {
       {/* Restaurant Routes */}
       <Route path="/restaurant" element={<AdminRoute><Restaurantlist /></AdminRoute>} />
       <Route path="/restaurants" element={<UserRoute><Restaurants /></UserRoute>} />
+      <Route path="/restaurant/:id" element={<UserRoute><RestaurantDetails /></UserRoute>} />
+      <Route path="/restaurant-reservations" element={<AdminRoute><RestaurantReservations /></AdminRoute>} />
 
       {/* User Hotel Reservations */}
       <Route path="/hotelreservations" element={<UserRoute><HotelReservations /></UserRoute>} />

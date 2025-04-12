@@ -1,6 +1,7 @@
 const Tour = require("../models/tours");
 const multer = require("multer");
 const path = require("path");
+const TourBooking = require("../models/tourBook");
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -186,10 +187,61 @@ const deleteTour = async (req, res) => {
   }
 };
 
+// Get count of tours for dashboard
+const getTourCount = async (req, res) => {
+  try {
+    const count = await Tour.countDocuments();
+    res.status(200).json({ count });
+  } catch (err) {
+    console.error("Error getting tour count:", err);
+    res.status(500).json({ message: "Error getting tour count", error: err.message });
+  }
+};
+
+// Get monthly tour bookings for dashboard
+const getMonthlyBookings = async (req, res) => {
+  try {
+    const pipeline = [
+      {
+        $project: {
+          month: { $month: "$createdAt" },
+          year: { $year: "$createdAt" }
+        }
+      },
+      {
+        $group: {
+          _id: { month: "$month", year: "$year" },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { "_id.year": -1, "_id.month": -1 }
+      }
+    ];
+
+    const bookings = await TourBooking.aggregate(pipeline);
+    
+    // Transform data to include month names
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const result = bookings.map(booking => ({
+      month: months[booking._id.month - 1],
+      year: booking._id.year,
+      count: booking.count
+    }));
+    
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("Error getting monthly bookings:", err);
+    res.status(500).json({ message: "Error getting monthly bookings", error: err.message });
+  }
+};
+
 module.exports = {
   createTour,
   updateTour,
   getAllTours,
   getTour,
   deleteTour,
+  getTourCount,
+  getMonthlyBookings
 };

@@ -2,6 +2,7 @@ const multer = require("multer");
 const Vehicle = require("../models/Vehicle");
 //const AcceptedVehicle = require("../models/AcceptedVehicle");
 const path = require("path");
+const VehicleBooking = require("../models/VehicleReservation");
 
 //image uploading path to diskStorage
 const storage = multer.diskStorage({
@@ -234,6 +235,76 @@ exports.getVehicleByLocation = async (req, res) => {
         res.status(500).send(err.message);
     }
 }
+
+// Get count of vehicles for dashboard
+const getVehicleCount = async (req, res) => {
+  try {
+    const count = await Vehicle.countDocuments();
+    res.status(200).json({ count });
+  } catch (err) {
+    console.error("Error getting vehicle count:", err);
+    res.status(500).json({ message: "Error getting vehicle count", error: err.message });
+  }
+};
+
+// Get monthly vehicle bookings for dashboard
+const getMonthlyBookings = async (req, res) => {
+  try {
+    const pipeline = [
+      {
+        $project: {
+          month: { $month: "$createdAt" },
+          year: { $year: "$createdAt" }
+        }
+      },
+      {
+        $group: {
+          _id: { month: "$month", year: "$year" },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { "_id.year": -1, "_id.month": -1 }
+      }
+    ];
+
+    const bookings = await VehicleBooking.aggregate(pipeline);
+    
+    // Transform data to include month names
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const result = bookings.map(booking => ({
+      month: months[booking._id.month - 1],
+      year: booking._id.year,
+      count: booking.count
+    }));
+    
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("Error getting monthly bookings:", err);
+    res.status(500).json({ message: "Error getting monthly bookings", error: err.message });
+  }
+};
+
+module.exports = {
+  addVehicle: exports.addVehicle,
+  getAllVehicle: exports.getAllVehicle,
+  getSpecificvehicle: exports.getSpecificvehicle,
+  deleteVehicle: exports.deleteVehicle,
+  acceptVehicle: exports.acceptVehicle,
+  getMyVehicles: exports.getMyVehicles,
+  updateVehicle: exports.updateVehicle,
+  availableVehicles: exports.availableVehicles,
+  getVehiclesByTypeAndLocation: exports.getVehiclesByTypeAndLocation,
+  getVehicleByType: exports.getVehicleByType,
+  getVehicleByLocation: exports.getVehicleByLocation,
+  getVehicleCount,
+  getMonthlyBookings,
+  // Map the legacy exports to new named exports
+  createVehicle: exports.addVehicle,
+  getVehicle: exports.getSpecificvehicle,
+  getAllVehicles: exports.getAllVehicle,
+  getVehiclesByLocation: exports.getVehicleByLocation
+};
 
 
 

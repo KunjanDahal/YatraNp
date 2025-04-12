@@ -1,10 +1,12 @@
 const express = require("express");
+const userController = require("../controllers/userController");
 const {
   updateUser,
   deleteUser,
   getUser,
   getAllUsers,
-} = require("../controllers/userController");
+  getUserCount
+} = userController;
 const {
   verifyToken,
   verifyUser,
@@ -36,20 +38,26 @@ router.get("/checkadmin/:id", verifyAdmin, (req, res, next) => {
     .json({ message: "Hello admin,You are logged in you can do this" });
 });
 
+// Analytics routes for dashboard - must be placed before the general routes
+router.get("/count", getUserCount);
+
 //update
 router.put("/:id", verifyUser, updateUser);
 //delete
 router.delete("/:id", verifyUser, deleteUser);
 //get
 router.get("/:id", verifyUser, getUser);
-//get all
-router.get("/", verifyAdmin, getAllUsers);
 
-router.route("/").post(registerUser);
+// Post route for creating users
+router.post("/", registerUser);
 
-//search api
-router.route("/").get(protect, allUsers);
+// Admin route for getting all users
+router.get("/admin/all", verifyAdmin, getAllUsers);
 
-router.route("/login").post(authUser);
+// Search API
+router.get("/search", protect, allUsers);
+
+// Login route
+router.post("/login", authUser);
 
 module.exports = router;

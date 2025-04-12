@@ -1,4 +1,5 @@
 const express = require("express");
+const vehicleController = require("../controllers/vehicleController");
 const {
     createVehicle,
     updateVehicle,
@@ -6,7 +7,7 @@ const {
     getVehicle,
     getAllVehicles,
     getVehiclesByLocation
-} = require("../controllers/vehicle");
+} = vehicleController;
 
 const router = express.Router();
 
@@ -45,5 +46,9 @@ router.get("/", getAllVehicles);
 
 // Get by location
 router.get("/location/:location", getVehiclesByLocation);
+
+// Analytics routes for dashboard
+router.get("/count", vehicleController.getVehicleCount);
+router.get("/bookings/monthly", vehicleController.getMonthlyBookings);
 
 module.exports = router; 

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { FaStar } from "react-icons/fa";
+import { FaMapMarkerAlt } from "react-icons/fa";
 
 const VehicleCard = (props) => {
   useEffect(() => {
@@ -32,16 +33,13 @@ const VehicleCard = (props) => {
       />
       
       <h1 className='py-2 text-xl font-bold border-b'>{props.brand} {props.model}</h1>
-      {/* <div className='flex items-center'>
-            <div className='flex'>
-            <FaStar/>
-            <FaStar/>
-            <FaStar/>
-            <FaStar/>
-            <FaStar/>
-            </div>
-            <p className='px-2'>4.5</p>
-        </div> */}
+      
+      {/* Location display */}
+      <div className='flex items-center mt-2 w-full px-4'>
+        <FaMapMarkerAlt className="text-red-500 text-lg flex-shrink-0" />
+        <p className='text-gray-600 ml-2 truncate'>{props.location || 'Location not specified'}</p>
+      </div>
+      
       <div className='flex space-x-4 mt-2'>
         <p className='text-gray-600'>{props.capacity} People</p>
         <p className='text-gray-600'>{props.transmissionType}</p>

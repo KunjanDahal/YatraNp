@@ -10,8 +10,9 @@ const {
     countByCity,
     countByType,
     getHotelbyCity,
-    getHotelRooms
-
+    getHotelRooms,
+    getHotelCount,
+    getMonthlyBookings
   } = require("../controllers/hotel.js");
 
 
@@ -43,6 +44,8 @@ router.get("/get/:city",getHotelbyCity)
 
 router.get("/room/:id",getHotelRooms);   
 
-
+// Analytics routes for dashboard
+router.get("/count", getHotelCount);
+router.get("/bookings/monthly", getMonthlyBookings);
 
 module.exports = router    

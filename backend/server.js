@@ -84,6 +84,10 @@ app.use('/api/hotels', hotels);
 const restaurants = require('./routes/restaurants');
 app.use('/api/restaurant', restaurants);
 
+//restaurant reservations
+const restaurantRouter = require('./routes/restaurantRouter');
+app.use('/api/restaurants', restaurantRouter);
+
 //vehicle
 const vehicles = require('./routes/vehicles');
 app.use('/api/vehicle', vehicles);

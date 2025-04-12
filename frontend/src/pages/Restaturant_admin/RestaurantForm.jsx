@@ -311,31 +311,41 @@ const RestaurantForm = () => {
               required
             >
               <option value="">Select District</option>
-              <option value="ampara">Ampara</option>
-              <option value="anuradhapura">Anuradhapura</option>
-              <option value="badulla">Badulla</option>
-              <option value="batticaloa">Batticaloa</option>
-              <option value="colombo">Colombo</option>
-              <option value="galle">Galle</option>
-              <option value="gampaha">Gampaha</option>
-              <option value="hambantota">Hambantota</option>
-              <option value="jaffna">Jaffna</option>
-              <option value="kalutara">Kalutara</option>
-              <option value="kandy">Kandy</option>
-              <option value="kegalle">Kegalle</option>
-              <option value="kilinochchi">Kilinochchi</option>
-              <option value="kurunegala">Kurunegala</option>
-              <option value="mannar">Mannar</option>
-              <option value="matale">Matale</option>
-              <option value="matara">Matara</option>
-              <option value="monaragala">Monaragala</option>
-              <option value="mulativu">Mullaitivu</option>
-              <option value="nuwara-eliya">Nuwara Eliya</option>
-              <option value="polonnaruwa">Polonnaruwa</option>
-              <option value="puttalam">Puttalam</option>
-              <option value="ratnapura">Ratnapura</option>
-              <option value="trincomalee">Trincomalee</option>
-              <option value="vavuniya">Vavuniya</option>
+              <option value="kathmandu">Kathmandu</option>
+              <option value="lalitpur">Lalitpur</option>
+              <option value="bhaktapur">Bhaktapur</option>
+              <option value="pokhara">Pokhara</option>
+              <option value="chitwan">Chitwan</option>
+              <option value="kaski">Kaski</option>
+              <option value="rupandehi">Rupandehi</option>
+              <option value="banke">Banke</option>
+              <option value="parsa">Parsa</option>
+              <option value="morang">Morang</option>
+              <option value="sunsari">Sunsari</option>
+              <option value="jhapa">Jhapa</option>
+              <option value="kailali">Kailali</option>
+              <option value="dang">Dang</option>
+              <option value="kavre">Kavre</option>
+              <option value="makwanpur">Makwanpur</option>
+              <option value="gorkha">Gorkha</option>
+              <option value="dhading">Dhading</option>
+              <option value="tanahu">Tanahu</option>
+              <option value="nawalparasi">Nawalparasi</option>
+              <option value="palpa">Palpa</option>
+              <option value="bardiya">Bardiya</option>
+              <option value="doti">Doti</option>
+              <option value="kanchanpur">Kanchanpur</option>
+              <option value="dolakha">Dolakha</option>
+              <option value="ramechhap">Ramechhap</option>
+              <option value="sindhuli">Sindhuli</option>
+              <option value="sarlahi">Sarlahi</option>
+              <option value="dhanusha">Dhanusha</option>
+              <option value="mahottari">Mahottari</option>
+              <option value="saptari">Saptari</option>
+              <option value="siraha">Siraha</option>
+              <option value="ilam">Ilam</option>
+              <option value="udayapur">Udayapur</option>
+              <option value="solukhumbu">Solukhumbu</option>
             </select>
           </div>
 

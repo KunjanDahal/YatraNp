@@ -59,12 +59,18 @@ const Restaurantlist = () => {
     <>
       <div className="flex flex-row col-span-2 lg:px-32 px-8 pt-7 pb-2 justify-between md:items-center ">
         <div className="text-3xl font-bold">Restaurant Management</div>
-        <div className="grid md:grid-cols-2 gap-1">
+        <div className="grid md:grid-cols-3 gap-1">
           <Link 
             to="/addrestaurant" 
             className="bg-blue-500 hover:bg-blue-700 text-center text-white font-bold py-2 px-4 rounded cursor-pointer lg:mt-0 mt-3"
           >
             Add Restaurant
+          </Link>
+          <Link 
+            to="/restaurant-reservations"
+            className="bg-green-600 hover:bg-green-700 text-center text-white font-bold py-2 px-4 rounded cursor-pointer lg:mt-0 mt-3"
+          >
+            View Reservations
           </Link>
           <button
             onClick={() => generatePDF(data)}

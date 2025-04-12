@@ -5,7 +5,9 @@ const {
     deleteRestaurant,
     getRestaurant,
     getAllRestaurants,
-    getRestaurantsByCity
+    getRestaurantsByCity,
+    getRestaurantCount,
+    getMonthlyBookings
 } = require("../controllers/restaurant");
 
 const router = express.Router();
@@ -27,5 +29,9 @@ router.get("/", getAllRestaurants);
 
 // Get by city
 router.get("/city/:city", getRestaurantsByCity);
+
+// Analytics routes for dashboard
+router.get("/count", getRestaurantCount);
+router.get("/bookings/monthly", getMonthlyBookings);
 
 module.exports = router; 
