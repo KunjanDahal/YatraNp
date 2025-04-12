@@ -8,7 +8,7 @@ const ServiceCard = () => {
   useEffect(() => {
     const getTours = async () => {
       try {
-        const response = await axios.get("/tours");
+        const response = await axios.get("/api/tours");
         console.log(response.data);
         setTour(response.data);
       } catch (err) {
@@ -27,7 +27,7 @@ const ServiceCard = () => {
           >
             <div className="min-h-80 aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-3xl bg-gray-200 lg:aspect-none group-hover:opacity-40 lg:h-80">
               <img
-                src={tours.img}
+                src={tours.img ? `http://localhost:5000/api/tours/images/${tours.img}` : "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg"}
                 alt="Tour"
                 className="h-full w-full object-cover object-center rounded-3xl lg:h-full lg:w-full"
               />
@@ -45,22 +45,16 @@ const ServiceCard = () => {
                   {tours.duration} days
                 </p>
               </h3>
-              {/* <div className=" flex flex-row mr-2 space-x-3">
-                <p className="mt-1 text-lg text-gray-500 ">{tours.avgRating}</p>
-                <AiFillStar className="text-xl mt-2 text-yellow-500 " />
-                <p className="mt-1 text-lg">({tours.reviews.length})</p>
-              </div> */}
             </div>
             <div className="flex flex-row mr-2 space-x-3 justify-between">
               <p className="text-sm text-left p-2 font-bold">
-                From ${tours.price}
+                From Rs.{tours.price}
               </p>
               <button
                 type="button"
                 data-te-ripple-init
                 data-te-ripple-color="light"
                 class="mb-2 inline-block rounded bg-primary px-4 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]"
-                onClick={console.log(tours._id)}
               >
                 <Link to={`/tours/${tours._id}`}>View Details</Link>
               </button>

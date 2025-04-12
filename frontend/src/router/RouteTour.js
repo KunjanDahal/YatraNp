@@ -48,7 +48,6 @@ import UpdateHotel from "../pages/hotel/UpdateHotel";
 import AddVehicle from "../pages/vehicle/AddVehicle";
 import EditVehicle from "../pages/vehicle/EditVehicle";
 import HotelView from "../components/hotel/HotelView";
-import HotelOverView from "../components/hotel/HotelOverview";
 import VehicleView from "../pages/vehicle/VehicleView";
 
 import RestaurentForm from "../pages/Restaturant/RestaurantForm";
@@ -77,6 +76,7 @@ import Restaurantlist from "../pages/Restaurantlist";
 import Restaurants from "../pages/Restaurants";
 import PaymentSuccess from "../pages/payment/PaymentSuccess";
 import KhaltiPaymentExample from "../pages/payment/KhaltiPaymentExample";
+import HotelReservations from '../pages/HotelReservations';
 
 const RouteTour = () => {
   const { user } = useContext(AuthContext);
@@ -183,6 +183,8 @@ const RouteTour = () => {
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/vehicle" element={<VehicleHome />} />
+      <Route path="/vehicles" element={<VehicleHome />} />
       
       {/* Payment routes */}
       <Route path="/payment/success" element={<SharedRoute><PaymentSuccess /></SharedRoute>} />
@@ -197,13 +199,13 @@ const RouteTour = () => {
       <Route path="/users" element={<AdminRoute><Userlist columns={userColumns} /></AdminRoute>} />
       <Route path="/hotels" element={<AdminRoute><Hotellist columns={hotelColumns} /></AdminRoute>} />
       <Route path="/tours" element={<AdminRoute><Tourlist columns={tourColumns} /></AdminRoute>} />
-      <Route path="/vehicle" element={<AdminRoute><Vehiclelist columns={vehicleColumns} /></AdminRoute>} />
+      <Route path="/vehicles/admin" element={<SharedRoute><Vehiclelist columns={vehicleColumns} /></SharedRoute>} />
       <Route path="/vehicle/add" element={<AdminRoute><AddVehicle /></AdminRoute>} />
       <Route path="/adduser" element={<AdminRoute><Adduser /></AdminRoute>} />
 
       {/* User-only routes */}
       <Route path="/" element={<UserRoute><Home /></UserRoute>} />
-      <Route path="/vehicles" element={<UserRoute><VehicleHome /></UserRoute>} />
+      <Route path="/vehicle" element={<VehicleHome />} />
       <Route path="/tours/home" element={<UserRoute><ToursHome /></UserRoute>} />
       <Route path="/tours/:id" element={<UserRoute><TourDetails /></UserRoute>} />
       <Route path="/hotelhome" element={<UserRoute><HotelHome /></UserRoute>} />
@@ -287,7 +289,7 @@ const RouteTour = () => {
       <Route path="/hotels/new" element={<AdminRoute><AddHotel /></AdminRoute>} />
       <Route path="/rooms/new/:id" element={<AdminRoute><AddRoom /></AdminRoute>} />
       <Route path="/hotels/update/:id" element={<AdminRoute><UpdateHotel /></AdminRoute>} />
-      <Route path="/hoteloverview/:id" element={<SharedRoute><HotelOverView /></SharedRoute>} />
+      <Route path="/hoteloverview/:id" element={<SharedRoute><HotelView /></SharedRoute>} />
       <Route path="/hoteladmin" element={<AdminRoute><HadminView /></AdminRoute>} />
       
       {/* User Hotel Booking */}
@@ -310,6 +312,9 @@ const RouteTour = () => {
       {/* Restaurant Routes */}
       <Route path="/restaurant" element={<AdminRoute><Restaurantlist /></AdminRoute>} />
       <Route path="/restaurants" element={<UserRoute><Restaurants /></UserRoute>} />
+
+      {/* User Hotel Reservations */}
+      <Route path="/hotelreservations" element={<UserRoute><HotelReservations /></UserRoute>} />
     </Routes>
   );
 };

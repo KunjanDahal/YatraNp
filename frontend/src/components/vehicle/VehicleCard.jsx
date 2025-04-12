@@ -1,8 +1,23 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { FaStar } from "react-icons/fa";
 
 const VehicleCard = (props) => {
+  useEffect(() => {
+    // Debug logs for component props
+    console.log(`VehicleCard for ${props.brand} ${props.model}:`, props);
+    
+    // Check for missing required properties
+    const requiredProps = ['brand', 'model', 'price', 'vehicleMainImg', 'capacity', 'transmissionType', 'fuelType', 'id'];
+    const missingProps = requiredProps.filter(prop => !props[prop]);
+    
+    if (missingProps.length > 0) {
+      console.error(`VehicleCard missing required properties: ${missingProps.join(', ')}`);
+    }
+    
+    console.log(`Image URL: http://localhost:5000/api/vehicle/images/${props.vehicleMainImg}`);
+  }, [props]);
+
   return (
     <div className='flex flex-col w-[300px] md:w-[300px] items-center border shadow-lg m-auto mb-8 rounded-lg bg-white'>
       <img 
@@ -10,6 +25,7 @@ const VehicleCard = (props) => {
         alt={`${props.brand} ${props.model}`} 
         className='w-full h-[200px] object-cover rounded-t-lg'
         onError={(e) => {
+          console.error(`Error loading image for ${props.brand} ${props.model}:`, e);
           e.target.onerror = null;
           e.target.src = 'logo512.png'; // Fallback image if vehicleMainImg fails
         }}

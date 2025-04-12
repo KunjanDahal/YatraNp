@@ -18,7 +18,18 @@ const CustomForm = new Schema({
     type: Number,
     required: [true, "Select Number of days you want to spend"],
   },
-});
+  status: {
+    type: String,
+    enum: ["new", "responded", "processed"],
+    default: "new",
+  },
+  adminResponse: {
+    type: String,
+  },
+  respondedAt: {
+    type: Date,
+  },
+}, { timestamps: true });
 
 const Form = mongoose.model("tour_Customize_Form", CustomForm);
 module.exports = Form;

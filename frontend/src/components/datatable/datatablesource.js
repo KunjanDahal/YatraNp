@@ -263,9 +263,8 @@ export const tourReservationColumns = [
         <div className="cellWithImg">
           <img
             className="cellImg"
-            //params.row.tourImg
             src={
-              "https://lushtours.lk/wp-content/uploads/2019/08/Philippine-Tour-Package.jpg" ||
+              params.row.img ? `/api/tours/images/${params.row.img}` :
               "https://i.ibb.co/MBtjqXQ/no-avatar.gif"
             }
             alt="avatar"

@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { AiOutlineRight } from "react-icons/ai";
 import TourNav from "../../components/navbar/TourNav";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import SearchBar from "./SearchBar";
 
 // Fallback tour data for popular destinations not in database
 const FALLBACK_TOURS = {
@@ -49,8 +51,28 @@ const image = {
   backgroundSize: "cover",
 };
 
+// Simple error boundary for components that might fail
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || null;
+    }
+    return this.props.children;
+  }
+}
+
 const SerachResults = () => {
   const { destination, duration, maxsize } = useParams();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [filteredTours, setTour] = useState([]);
@@ -60,7 +82,7 @@ const SerachResults = () => {
     const getTours = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("/tours");
+        const response = await axios.get("/api/tours");
         
         // Improved search logic to search in both name and cities
         const tours = response.data.filter((tour) => {
@@ -128,7 +150,7 @@ const SerachResults = () => {
           <div className="flex h-full items-center justify-center text-center relative z-10">
             <div>
               <h2
-                className="mb-5 text-6xl font-bold text-white"
+                className="mb-10 text-6xl font-bold text-white"
                 style={{
                   fontFamily: "Poppins, sans-serif",
                   fontWeight: "bolder",
@@ -138,20 +160,24 @@ const SerachResults = () => {
                 Search Results
               </h2>
               <div>
-                <div className="mt-12 w-1/2 mr-auto ml-auto">
+                <div className="mt-12 w-3/5 mr-auto ml-auto">
                   <h4
-                    className="mt-5 mb-6 text-xl uppercase animate-bounce text-white text-center"
+                    className="mt-5 mb-12 text-xl uppercase animate-bounce text-white text-center"
                     style={{
                       fontFamily: "Poppins, sans-serif",
                       fontWeight: "normal",
                       border: "solid 1px white",
                       textShadow: "2px 2px 4px rgba(0,0,0,0.8)",
-                      padding: "10px"
+                      padding: "20px 40px",
+                      letterSpacing: "1px"
                     }}
                   >
                     DISCOVER NEPAL
                   </h4>
                 </div>
+              </div>
+              <div className="mt-8 mb-8 px-4">
+                <SearchBar initialDestination={destination} />
               </div>
             </div>
           </div>
@@ -188,6 +214,8 @@ const SerachResults = () => {
         </ol>
       </nav>
       {/* Navigated menu end*/}
+      
+      {/* Tour navigation menu */}
       <TourNav />
 
       <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8">
@@ -221,58 +249,59 @@ const SerachResults = () => {
                 {filteredTours.map((tour) => (
                   <div
                     key={tour._id}
-                    className="group relative rounded-t-3xl shadow-2xl rounded-b-xl border-2"
+                    className="group relative rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 bg-white"
                   >
-                    <div className="min-h-80 aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-3xl bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-80">
+                    {/* Image section */}
+                    <div className="aspect-w-16 aspect-h-9 w-full overflow-hidden">
                       <img
-                        src={tour.img || "https://images.pexels.com/photos/2901209/pexels-photo-2901209.jpeg"}
-                        alt={tour.name || "Tour"}
-                        className="h-full w-full object-cover object-center rounded-3xl lg:h-full lg:w-full"
+                        src={tour.img ? `http://localhost:5000/api/tours/images/${tour.img}` : "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg"}
+                        alt={tour.name}
+                        className="h-64 w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                       />
+                      
+                      {/* Tour duration badge */}
+                      <div className="absolute top-4 left-4 bg-white bg-opacity-90 rounded-full px-3 py-1 text-sm font-medium text-gray-800">
+                        {tour.duration} days
+                      </div>
                     </div>
-                    <div className="mt-4 flex justify-between p-3">
-                      <h3 className="text-2xl font-bold text-gray-700">
+                    
+                    {/* Content section */}
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors">
+                        {tour.name}
+                      </h3>
+                      
+                      <div className="flex items-center justify-between mt-4">
+                        <div className="text-green-600 font-bold">
+                          <span className="text-sm">From </span>
+                          <span className="text-2xl">Rs.{tour.price}</span>
+                        </div>
+                        
                         {!tour._id.startsWith('fallback') ? (
-                          <Link to={`/tours/${tour._id}`}>
-                            <span
-                              aria-hidden="true"
-                              className="absolute inset-0 rounded-t-3xl"
-                            />
-                            {tour.name}
+                          <Link to={`/tours/${tour._id}`} className="inline-block">
+                            <button
+                              type="button"
+                              className="inline-block rounded bg-blue-600 px-6 py-3 text-sm font-medium uppercase leading-normal text-white shadow-md transition duration-150 ease-in-out hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800"
+                            >
+                              EXPLORE
+                            </button>
                           </Link>
                         ) : (
-                          <span>{tour.name}</span>
+                          <button
+                            type="button"
+                            className="inline-block rounded bg-green-600 px-6 py-3 text-sm font-medium uppercase leading-normal text-white shadow-md transition duration-150 ease-in-out hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800"
+                            onClick={() => alert("This is a suggested tour. Contact us to customize this package!")}
+                          >
+                            Contact Us
+                          </button>
                         )}
-                        <p className="text-lg font-medium text-gray-900">
-                          {tour.duration} days
-                        </p>
-                      </h3>
+                      </div>
                     </div>
-                    <div className="flex flex-row mr-2 space-x-3 justify-between">
-                      <p className="text-sm text-left p-2 font-bold">
-                        From ${tour.price}
-                      </p>
-                      {!tour._id.startsWith('fallback') ? (
-                        <button
-                          type="button"
-                          data-te-ripple-init
-                          data-te-ripple-color="light"
-                          className="mb-2 inline-block rounded bg-primary px-4 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)]"
-                        >
-                          <Link to={`/tours/${tour._id}`}>View Details</Link>
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          data-te-ripple-init
-                          data-te-ripple-color="light"
-                          className="mb-2 inline-block rounded bg-green-600 px-4 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-md transition duration-150 ease-in-out hover:bg-green-700 focus:bg-green-700 focus:outline-none focus:ring-0"
-                          onClick={() => alert("This is a suggested tour. Contact us to customize this package!")}
-                        >
-                          Contact Us
-                        </button>
-                      )}
-                    </div>
+                    
+                    {/* Make entire card clickable */}
+                    {!tour._id.startsWith('fallback') && (
+                      <Link to={`/tours/${tour._id}`} className="absolute inset-0 z-10" aria-hidden="true" />
+                    )}
                   </div>
                 ))}
               </div>

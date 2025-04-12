@@ -119,8 +119,23 @@ const declineReservation = async (req, res) => {
   }
 };
 
+// Add this function to get reservations for the current user
+const getMyReservations = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const reservations = await HotelReservation.find({ 
+      userId: userId 
+    }).sort({ createdAt: -1 });
+    
+    res.status(200).json(reservations);
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = { 
   getAllReservations,
   approveReservation,
-  declineReservation
+  declineReservation,
+  getMyReservations
 }; 

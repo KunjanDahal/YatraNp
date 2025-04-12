@@ -25,8 +25,8 @@ const VehicleBook = () => {
       const fetchData = async () => {
         try {
           const [vehicleResponse, reservationResponse] = await Promise.all([
-            axios.get(`/vehicle/${id}`),
-            axios.get(`/vehiclereservation/traveler/vehicles/${id}`)
+            axios.get(`/api/vehicle/${id}`),
+            axios.get(`/api/vehiclereservation/traveler/vehicles/${id}`)
           ]);
           
           // modify the reservation data format to match the input type of date fields

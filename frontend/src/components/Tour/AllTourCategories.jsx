@@ -64,8 +64,8 @@ const Beach = () => {
                   >
                     <div className="min-h-80 aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-3xl bg-gray-200 lg:aspect-none group-hover:opacity-40 lg:h-80">
                       <img
-                        src={tours.img}
-                        alt="Tour"
+                        src={tours.img ? `http://localhost:5000/api/tours/images/${tours.img}` : "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg"}
+                        alt={tours.name}
                         className="h-full w-full object-cover object-center rounded-3xl lg:h-full lg:w-full"
                       />
                     </div>
@@ -90,7 +90,7 @@ const Beach = () => {
                     </div>
                     <div className="flex flex-row mr-2 space-x-3 justify-between">
                       <p className="text-sm text-left p-2 font-bold">
-                        From ${tours.price}
+                        From Rs.{tours.price}
                       </p>
                       <button
                         type="button"

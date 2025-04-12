@@ -18,8 +18,11 @@ router
   .patch(tourController.updateTour)
   .delete(tourController.deleteTour);
 
-//custom form
+//custom form routes
 router.route("/customform").post(tourCustomForm.createForm);
+router.route("/customform/all").get(tourCustomForm.getAllForms);
+router.route("/customform/:id").patch(tourCustomForm.updateForm).delete(tourCustomForm.deleteForm);
+router.route("/customform/respond/:id").post(tourCustomForm.respondToForm);
 
 // router.route("/tt").post(tourReservation.getAllReservations);
 //reserve form

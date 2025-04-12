@@ -1,16 +1,12 @@
 import { TbPhotoPlus } from "react-icons/tb";
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { Ripple, initTE } from "tw-elements";
 import Swal from "sweetalert2";
 import axios from "axios";
 import { AuthContext } from "../../../context/authContext";
 import { useLocation } from "react-router-dom";
 
 const AddTourPackage = () => {
-  useEffect(() => {
-    initTE({ Ripple });
-  }, []);
   const navigate = useNavigate();
   const { state } = useLocation();
 

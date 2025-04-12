@@ -1,222 +1,197 @@
 const axios = require('axios');
 const dotenv = require('dotenv');
 const Payment = require('../models/Payment');
+const Hotel = require('../models/Hotel');
+const hotelReservation = require('../models/hotelReservationModel');
 
 dotenv.config();
 
-// Khalti configuration with hardcoded test values
-const KHALTI_CONFIG = {
-  secretKey: 'test_secret_key_f59e8b7d18b4499ca40f68195a846e9b',
-  publicKey: 'test_public_key_dc74e0fd57cb46cd93832aee0a390234',
-  baseUrl: 'https://a.khalti.com/api/v2' // Sandbox environment
-};
+// Environment variables for Khalti (replace these with your actual keys)
+const KHALTI_SECRET_KEY = process.env.KHALTI_SECRET_KEY || '35652de6273d4a77843e4e8acf563dd0'; // Change this to your real key
+const KHALTI_PUBLIC_KEY = process.env.KHALTI_PUBLIC_KEY || '18e8a8026d0b4ab68f9a36593d07e593'; // Change this to your real key
+const KHALTI_API_URL = process.env.NODE_ENV === 'production' ? 'https://khalti.com/api/v2' : 'https://dev.khalti.com/api/v2'; // Use production URL in production
 
 console.log('Using Khalti config:', {
-  baseUrl: KHALTI_CONFIG.baseUrl,
-  publicKeyFirstChars: KHALTI_CONFIG.publicKey.substring(0, 10) + '...',
-  secretKeyFirstChars: KHALTI_CONFIG.secretKey.substring(0, 10) + '...'
+  baseUrl: KHALTI_API_URL,
+  publicKeyFirstChars: KHALTI_PUBLIC_KEY.substring(0, 10) + '...',
+  secretKeyFirstChars: KHALTI_SECRET_KEY.substring(0, 10) + '...'
 });
 
 // Initialize payment with Khalti
 const initiateKhaltiPayment = async (req, res) => {
   try {
-    const {
-      amount,
-      purchase_order_id,
-      purchase_order_name,
-      customer_info,
-      product_details,
-      return_url,
-      website_url
+    const { 
+      hotelId, 
+      hotelName, 
+      checkInDate, 
+      checkOutDate, 
+      userName,
+      totalPrice,
+      totalDays,
+      rooms,
+      email,
+      phone 
     } = req.body;
 
-    console.log('Payment initiation request received:', {
-      amount,
-      purchase_order_id,
-      purchase_order_name
-    });
-
-    if (!amount || !purchase_order_id || !purchase_order_name) {
-      return res.status(400).json({
-        success: false,
-        message: 'Missing required payment information'
-      });
-    }
-
-    // Create payment payload for Khalti
+    // Ensure price is valid (minimum 10 Rs = 1000 paisa)
+    const amountInPaisa = Math.max(totalPrice * 100, 1000);
+    
+    // Create a unique order ID (purchase_order_id)
+    const purchaseOrderId = `hotel_${hotelId}_${Date.now()}`;
+    
+    // Prepare the payload for Khalti
     const payload = {
-      return_url: return_url || `${req.protocol}://${req.get('host')}/payment/success`,
-      website_url: website_url || `${req.protocol}://${req.get('host')}`,
-      amount: amount,
-      purchase_order_id: purchase_order_id,
-      purchase_order_name: purchase_order_name,
-      customer_info: customer_info || {
-        name: 'Customer',
-        email: 'customer@example.com',
-        phone: '9800000000'
+      return_url: `${req.protocol}://${req.get('host')}/api/payment/khalti/verify`,
+      website_url: `${req.protocol}://${req.get('host')}`,
+      amount: amountInPaisa,
+      purchase_order_id: purchaseOrderId,
+      purchase_order_name: `Hotel Booking: ${hotelName}`,
+      customer_info: {
+        name: userName,
+        email: email || 'guest@example.com',
+        phone: phone || '9800000000'
       },
-      product_details: product_details || 'Product payment',
       amount_breakdown: [
         {
-          label: purchase_order_name,
-          amount: amount
+          label: "Hotel Booking",
+          amount: amountInPaisa
         }
       ],
-      product_url: `${req.protocol}://${req.get('host')}`
+      product_details: [
+        {
+          identity: hotelId,
+          name: hotelName,
+          total_price: amountInPaisa,
+          quantity: 1,
+          unit_price: amountInPaisa
+        }
+      ]
     };
 
-    console.log('Sending request to Khalti with payload:', payload);
-
-    try {
-      // Make request to Khalti API
-      const response = await axios.post(
-        `${KHALTI_CONFIG.baseUrl}/epayment/initiate/`, 
-        payload,
-        {
-          headers: {
-            'Authorization': `Key ${KHALTI_CONFIG.secretKey}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      console.log('Received response from Khalti:', response.data);
-
-      // Create payment record in database
-      const payment = new Payment({
-        orderId: purchase_order_id,
-        amount: amount / 100, // Store in NPR (not paisa)
-        status: 'INITIATED',
-        paymentMethod: 'khalti',
-        metadata: {
-          pidx: response.data.pidx,
-          payment_url: response.data.payment_url
-        },
-        // Store user ID if available, otherwise store as null
-        user: req.user ? req.user._id : null
-      });
-
-      await payment.save();
-      console.log('Payment record created with ID:', payment._id);
-
-      // Return success response
-      return res.status(200).json({
-        success: true,
-        payment_url: response.data.payment_url,
-        pidx: response.data.pidx,
-        message: 'Payment initiated successfully'
-      });
-    } catch (khaltiError) {
-      console.error('Khalti API error:', khaltiError);
-      console.error('Khalti API error response:', khaltiError.response?.data);
-      
-      // Handle Khalti API-specific errors
-      return res.status(500).json({
-        success: false,
-        message: 'Failed to initiate payment with Khalti',
-        error: khaltiError.response?.data?.detail || khaltiError.response?.data?.error || khaltiError.message
-      });
-    }
-  } catch (error) {
-    console.error('Khalti payment initiation error:', error.message);
-    console.error('Full error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to initiate payment',
-      error: error.message
+    // Save the transaction data for verification later
+    // We'll create a reservation with pending status
+    const newReservation = new hotelReservation({
+      hotelName,
+      checkInDate,
+      checkOutDate,
+      userName,
+      totalPrice,
+      totalDays,
+      paymentStatus: 'pending',
+      paymentMethod: 'Khalti',
+      purchaseOrderId,
+      rooms: rooms || []
     });
-  }
-};
+    
+    await newReservation.save();
 
-// Verify payment with Khalti
-const verifyKhaltiPayment = async (req, res) => {
-  try {
-    const { pidx } = req.body;
-
-    if (!pidx) {
-      return res.status(400).json({
-        success: false,
-        message: 'Missing payment index (pidx)'
-      });
-    }
-
-    // Make request to Khalti API to verify payment
+    // Make request to Khalti API
     const response = await axios.post(
-      `${KHALTI_CONFIG.baseUrl}/epayment/lookup/`, 
-      { pidx },
+      `${KHALTI_API_URL}/epayment/initiate/`, 
+      payload,
       {
         headers: {
-          'Authorization': `Key ${KHALTI_CONFIG.secretKey}`,
+          'Authorization': `Key ${KHALTI_SECRET_KEY}`,
           'Content-Type': 'application/json'
         }
       }
     );
 
-    // Find payment record in database
-    const payment = await Payment.findOne({
-      'metadata.pidx': pidx
-    });
-
-    if (!payment) {
-      return res.status(404).json({
-        success: false,
-        message: 'Payment record not found'
-      });
-    }
-
-    // Update payment record
-    if (response.data.status === 'Completed') {
-      payment.status = 'COMPLETED';
-      payment.transactionId = response.data.transaction_id;
-      payment.completedAt = new Date();
-      payment.metadata = {
-        ...payment.metadata,
-        ...response.data
-      };
-      await payment.save();
-    }
-
-    // Return success response
+    // Return payment URL to frontend
     return res.status(200).json({
       success: true,
-      data: response.data,
-      message: 'Payment verified successfully'
+      payment_url: `https://pay.khalti.com/${response.data.pidx}`,
+      pidx: response.data.pidx,
+      reservation_id: newReservation._id
     });
+
   } catch (error) {
-    console.error('Khalti payment verification error:', error.response?.data || error.message);
+    console.error('Khalti payment initiation error:', error);
     return res.status(500).json({
       success: false,
-      message: 'Failed to verify payment',
-      error: error.response?.data?.detail || error.message
+      message: 'Failed to initiate payment',
+      error: error.response?.data || error.message
     });
   }
 };
 
-// Get payment status
-const getPaymentStatus = async (req, res) => {
+// Verify Khalti payment after user is redirected back
+const verifyKhaltiPayment = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { pidx, purchase_order_id, status } = req.query;
 
-    // Find payment record
-    const payment = await Payment.findById(id);
-
-    if (!payment) {
-      return res.status(404).json({
-        success: false,
-        message: 'Payment not found'
-      });
+    // If user canceled, redirect to booking page with error
+    if (status === 'User canceled') {
+      return res.redirect(`/hotelhome?payment=canceled`);
     }
 
-    // Return payment data
+    // Verify payment status with Khalti
+    const verificationResponse = await axios.post(
+      `${KHALTI_API_URL}/epayment/lookup/`,
+      { pidx },
+      {
+        headers: {
+          'Authorization': `Key ${KHALTI_SECRET_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    // Find reservation by purchase_order_id
+    const reservationId = purchase_order_id?.split('_')?.[1];
+    const reservation = await hotelReservation.findOne({ purchaseOrderId: purchase_order_id });
+
+    if (!reservation) {
+      return res.redirect(`/hotelhome?payment=not_found`);
+    }
+
+    // Update reservation based on payment status
+    if (verificationResponse.data.status === 'Completed') {
+      reservation.paymentStatus = 'completed';
+      reservation.transactionId = verificationResponse.data.transaction_id;
+      await reservation.save();
+
+      // Update room availability (this would need to be implemented)
+      // Similar to what's in HotelReserve.jsx
+
+      return res.redirect(`/hotelreservations?payment=success&id=${reservation._id}`);
+    } else {
+      reservation.paymentStatus = 'failed';
+      await reservation.save();
+      return res.redirect(`/hotelhome?payment=failed`);
+    }
+
+  } catch (error) {
+    console.error('Payment verification error:', error);
+    return res.redirect(`/hotelhome?payment=error`);
+  }
+};
+
+// Get payment status (for checking status client-side)
+const getPaymentStatus = async (req, res) => {
+  try {
+    const { reservation_id } = req.params;
+    
+    const reservation = await hotelReservation.findById(reservation_id);
+    
+    if (!reservation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Reservation not found'
+      });
+    }
+    
     return res.status(200).json({
       success: true,
-      data: payment
+      paymentStatus: reservation.paymentStatus,
+      reservation
     });
+    
   } catch (error) {
-    console.error('Get payment status error:', error.message);
+    console.error('Error checking payment status:', error);
     return res.status(500).json({
       success: false,
-      message: 'Failed to get payment status',
+      message: 'Failed to check payment status',
       error: error.message
     });
   }

@@ -2,406 +2,350 @@ import React, { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
 import HeroTour from "./HeroTour";
 import TourNav from "../../components/navbar/TourNav";
-import { AiFillStar } from "react-icons/ai";
-import { Stepper, initTE, Ripple, Input, Datepicker } from "tw-elements";
+import { AiFillStar, AiOutlineCalendar, AiOutlineTrophy, AiOutlineUser, AiOutlineGlobal } from "react-icons/ai";
+import { BiCategory } from "react-icons/bi";
+import { MdOutlineLocationOn } from "react-icons/md";
 import DaysShow from "../../components/Tour/DaysShow";
 import InclusionExclusion from "../../components/Tour/InclusionExclusion";
 import { AuthContext } from "../../context/authContext";
+import TourKhaltiPayment from "../../components/payment/TourKhaltiPayment";
 import Swal from "sweetalert2";
 import axios from "axios";
 
 const TourDetails = () => {
   const { id } = useParams();
-
+  const [showPayment, setShowPayment] = useState(false);
   const [firstName, setFname] = useState("");
   const [lastName, setLname] = useState("");
   const [date, setDate] = useState("");
-  const [phone, setPhone] = useState(0);
+  const [phone, setPhone] = useState("");
   const [guestCount, setGuests] = useState("");
+  const [allTours, setTour] = useState(null);
+  const [loading, setLoading] = useState(true);
+  
+  // get email of current user
+  const { user } = useContext(AuthContext);
+  const currentUser = user?.email;
 
-  const [allTours, setTour] = useState([]);
   useEffect(() => {
     const getTours = async () => {
       try {
-        const response = await axios.get(`/tours/${id}`);
+        setLoading(true);
+        const response = await axios.get(`/api/tours/${id}`);
         console.log(response.data.data.oneTour);
         setTour(response.data.data.oneTour);
       } catch (err) {
         console.log(err.message);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to load tour details. Please try again.",
+        });
+      } finally {
+        setLoading(false);
       }
     };
     getTours();
-    initTE({ Stepper, initTE, Ripple, Input, Datepicker });
   }, [id]);
-  //get email of current user
-  const { user } = useContext(AuthContext);
-  const currentUser = user.email;
 
-  const inputHandler = async (e) => {
-    e.preventDefault();
-
-    if (
-      firstName === "" ||
-      lastName === "" ||
-      date === "" ||
-      phone === "" ||
-      guestCount === ""
-    ) {
+  const validateBookingForm = () => {
+    if (!firstName || !lastName || !date || !phone || !guestCount) {
       Swal.fire({
         icon: "error",
-        title: "Oops...",
-        text: "missing required fields!",
+        title: "Incomplete Information",
+        text: "Please fill in all required fields.",
       });
-      return;
+      return false;
     }
 
     if (phone.length !== 10) {
       Swal.fire({
         icon: "error",
-        title: "Oops...",
-        text: "enter valid mobile number",
+        title: "Invalid Phone Number",
+        text: "Please enter a valid 10-digit mobile number.",
       });
-      return;
+      return false;
     }
 
-    if (guestCount > allTours.groupCount) {
+    if (allTours && Number(guestCount) > allTours.groupCount) {
       Swal.fire({
         icon: "error",
-        title: "Oops...",
-        text: `This tour can have maximum of ${allTours.groupCount} members`,
+        title: "Group Size Exceeded",
+        text: `This tour can have a maximum of ${allTours.groupCount} members.`,
       });
-      return;
+      return false;
     }
-    const tourReservation = {
-      currentUser,
-      firstName,
-      lastName,
-      date,
-      phone,
-      guestCount,
-    };
-
-    try {
-      const result = await Swal.fire({
-        title: "Do you want to Book this tour?",
-        showDenyButton: true,
-        showCancelButton: true,
-        confirmButtonText: "Book",
-        denyButtonText: `Don't Book`,
-      });
-
-      if (result.isConfirmed) {
-        const response = await axios.post(
-          "/tours/tourReservation",
-          tourReservation
-        );
-        Swal.fire(response.data.message, "", "success");
-      } else if (result.isDenied) {
-        Swal.fire("Tour Booking Cancelled", "", "error");
-      }
-    } catch (err) {
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: err.message,
-      });
-    }
+    
+    return true;
   };
+
+  const handleBookNow = (e) => {
+    e.preventDefault();
+    
+    if (!validateBookingForm()) {
+      return;
+    }
+    
+    // Instead of directly submitting, show payment component
+    setShowPayment(true);
+  };
+  
+  // Prepare booking data for payment
+  const bookingData = {
+    firstName,
+    lastName,
+    date,
+    phone,
+    guestCount,
+    email: currentUser
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div>
       {/* import upper section */}
       <HeroTour />
       <TourNav />
+      
       {/* details brief */}
       <div className="mx-auto max-w-2xl px-4 py-10 sm:px-4 sm:py-15 lg:max-w-7xl lg:px-8">
         {/* title */}
-        <div className="mb-20">
-          {/* Title */}
-          <p className="text-5xl font-bold ">{allTours.name}</p>
-        </div>
-
-        {/* brief */}
-        <div className="my-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-5 xl:gap-x-8">
-          <div>
-            <p className="text-3xl font-bold mb-6  text-gray-500">Category</p>
-            <p className="text-2xl mb-6">{allTours.category}</p>
-          </div>
-          <div>
-            <p className="text-3xl font-bold mb-6  text-gray-500">Duration</p>
-            <p className="text-2xl mb-6">{allTours.duration} days</p>
-          </div>
-          <div>
-            <p className="text-3xl font-bold mb-6  text-gray-500">Ranking</p>
-            <div className="flex flex-row mr-2 space-x-2">
-              <p className="text-2xl mb-6">{}</p>
-              <AiFillStar className="text-3xl text-yellow-500 " />
+        <div className="mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-800">{allTours?.name}</h1>
+          
+          {/* Location + ID */}
+          <div className="flex flex-wrap items-center gap-4 mt-4">
+            {allTours?.cities && (
+              <div className="flex items-center text-gray-600">
+                <MdOutlineLocationOn className="text-xl mr-1 text-blue-600" />
+                <span>{allTours.cities}</span>
+              </div>
+            )}
+            <div className="text-gray-500 text-sm">
+              Tour ID: {allTours?._id?.substring(0, 8) || "T0027"}
             </div>
           </div>
-          <div>
-            <p className="text-3xl font-bold mb-6  text-gray-500">Group Size</p>
-            <p className="text-2xl mb-6">{allTours.groupCount}</p>
+        </div>
+
+        {/* Tour info cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-10">
+          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+            <div className="flex items-center gap-2 text-gray-500 mb-2">
+              <BiCategory className="text-blue-600 text-xl" />
+              <h3 className="font-semibold">Category</h3>
+            </div>
+            <p className="text-lg">{allTours?.category || "Adventure"}</p>
           </div>
-          <div>
-            <p className="text-3xl font-bold mb-6  text-gray-500">Languages</p>
-            <p className="text-2xl mb-6">{allTours.languages}</p>
+          
+          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+            <div className="flex items-center gap-2 text-gray-500 mb-2">
+              <AiOutlineCalendar className="text-blue-600 text-xl" />
+              <h3 className="font-semibold">Duration</h3>
+            </div>
+            <p className="text-lg">{allTours?.duration || "0"} days</p>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+            <div className="flex items-center gap-2 text-gray-500 mb-2">
+              <AiOutlineTrophy className="text-blue-600 text-xl" />
+              <h3 className="font-semibold">Rating</h3>
+            </div>
+            <div className="flex items-center">
+              <p className="text-lg mr-1">4.8</p>
+              <AiFillStar className="text-yellow-500 text-xl" />
+            </div>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+            <div className="flex items-center gap-2 text-gray-500 mb-2">
+              <AiOutlineUser className="text-blue-600 text-xl" />
+              <h3 className="font-semibold">Group Size</h3>
+            </div>
+            <p className="text-lg">Max {allTours?.groupCount || "10"}</p>
+          </div>
+          
+          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+            <div className="flex items-center gap-2 text-gray-500 mb-2">
+              <AiOutlineGlobal className="text-blue-600 text-xl" />
+              <h3 className="font-semibold">Languages</h3>
+            </div>
+            <p className="text-lg">{allTours?.languages || "English"}</p>
           </div>
         </div>
-        {/* image and details brief */}
-        <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-2 xl:gap-x-8">
-          {/* image left */}
-          <div className="">
-            <div>
+
+        {/* Main content - image, details, booking */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left column: Tour image and actions */}
+          <div>
+            <div className="rounded-xl overflow-hidden shadow-md mb-6">
               <img
-                src={allTours.img}
-                alt={""}
-                class="h-auto max-w-full rounded-3xl"
+                src={allTours?.img ? `http://localhost:5000/api/tours/images/${allTours.img}` : "https://images.pexels.com/photos/2166711/pexels-photo-2166711.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"}
+                alt={allTours?.name}
+                className="h-full w-full object-cover object-center"
               />
             </div>
-            {/* below map */}
-            <div className="mt-5 grid grid-cols-2 gap-2">
-              {/* left */}
-              <div>
-                <img
-                  src="https://firebasestorage.googleapis.com/v0/b/travely-7264c.appspot.com/o/route1.png?alt=media&token=99974a15-ffab-4900-b805-5da493d16d73"
-                  alt=""
-                />
-              </div>
-              {/* right */}
-              <div className="flex flex-col gap-6 ">
-                {/* Download Brochure */}
-                <button
-                  type="button"
-                  data-te-ripple-init
-                  data-te-ripple-color="light"
-                  class="flex items-center rounded-xl bg-black px-6 pb-2 pt-2.5 text-md font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]"
-                >
-                  <svg
-                    fill="currentColor"
-                    viewBox="0 0 16 16"
-                    class=" h-4 w-4 mr-5"
-                  >
-                    <path d="M.5 9.9a.5.5 0 01.5.5v2.5a1 1 0 001 1h12a1 1 0 001-1v-2.5a.5.5 0 011 0v2.5a2 2 0 01-2 2H2a2 2 0 01-2-2v-2.5a.5.5 0 01.5-.5z" />
-                    <path d="M7.646 11.854a.5.5 0 00.708 0l3-3a.5.5 0 00-.708-.708L8.5 10.293V1.5a.5.5 0 00-1 0v8.793L5.354 8.146a.5.5 0 10-.708.708l3 3z" />
-                  </svg>
-                  Download Brochure
-                </button>
-
-                <button
-                  type="button"
-                  data-te-ripple-init
-                  data-te-ripple-color="light"
-                  class="flex items-center rounded-xl bg-black px-6 pb-2 pt-2.5 text-md font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]"
-                >
-                  <svg
-                    fill="currentColor"
-                    viewBox="0 0 16 16"
-                    class=" h-4 w-4 mr-5"
-                  >
-                    <path d="M16 8A8 8 0 110 8a8 8 0 0116 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 00.25.246h.811a.25.25 0 00.25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 00.241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z" />
-                  </svg>
-                  Ask A Question
-                </button>
-
-                <button
-                  type="button"
-                  data-te-ripple-init
-                  data-te-ripple-color="light"
-                  class="flex items-center rounded-xl bg-black px-6 pb-2 pt-2.5 text-md font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]"
-                >
-                  <svg fill="none" viewBox="0 0 16 16" class=" h-4 w-4 mr-5">
-                    <path
-                      fill="currentColor"
-                      d="M2 8a1 1 0 011-1h18a1 1 0 110 2H3a1 1 0 01-1-1zM2 12a1 1 0 011-1h18a1 1 0 110 2H3a1 1 0 01-1-1zM3 15a1 1 0 100 2h12a1 1 0 100-2H3z"
-                    />
-                  </svg>
-                  Check FAQ
-                </button>
-              </div>
-            </div>
           </div>
-
-          {/* details -right*/}
-          <div className="shadow-2xl rounded-xl border-dotted border-2 border-sky-500 grid grid-cols-1 px-4">
-            <div>
-              {/* first row */}
-              <div className="grid grid-cols-2">
-                {/* left col */}
-                <div>
-                  <p className="text-lg p-2 font-bold ">Starting From</p>
-                  <p className="p-3 ml-10 text-blue-600  text-5xl">
-                    <span className="font-semibold">${allTours.price}</span>
-                    <span className="text-sm text-black">/Per Person</span>
-                  </p>
-                </div>
-                {/* right col */}
-                <div className="flex flex-row-reverse space-x-2 float-right pt-3 ">
-                  {/* <p className="text-lg">({reviews.length} Reviews)</p> */}
-                  <AiFillStar className="text-2xl text-yellow-500 " />
-                  <p className="text-lg mb-6">{}</p>
-                </div>
-              </div>
-
-              {/* second row */}
-              <div className="flex flex-row pl-10 pt-2 pr-2 space-x-3 mb-4">
-                <p className="text-xl font-bold">Cities:</p>
-                <p className="text-xl  mb-0   text-blue-500">
-                  {allTours.cities}
-                </p>
-              </div>
-
-              {/* third row */}
-              <div className="text-xl p-2 grid grid-cols-2">
-                <div>
-                  <span className="font-bold">Tour ID :</span> T0027
-                </div>
-                <div>
-                  <button
-                    type="button"
-                    class=" w-full rounded-xl bg-[#FE4D42] px-6 pb-2 pt-2.5 text-sm font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]"
-                  >
-                    Customize Your Tour
-                  </button>
-                </div>
-              </div>
-            </div>
-            {/* booking form */}
-            <div className="px-4 mb-6 mt-2">
-              <p className="text-3xl mb-10 text-center">Booking Details</p>
-              <div className="flex justify-center items-center">
-                <div class=" block max-w-md rounded-lg bg-white p-6 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] ">
-                  <form>
-                    <div class="grid grid-cols-2 gap-4">
-                      <div class="relative mb-6" data-te-input-wrapper-init>
-                        <input
-                          type="text"
-                          class="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:text-black dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
-                          id="firstName"
-                          aria-describedby="emailHelp123"
-                          placeholder="First name"
-                          onChange={(e) => {
-                            setFname(e.target.value);
-                          }}
-                        />
-                        <label
-                          for="firstName"
-                          class="pointer-events-none absolute left-3 top-0 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[1.6] text-neutral-500 transition-all duration-200 ease-out peer-focus:-translate-y-[0.9rem] peer-focus:scale-[0.8] peer-focus:text-primary peer-data-[te-input-state-active]:-translate-y-[0.9rem] peer-data-[te-input-state-active]:scale-[0.8] motion-reduce:transition-none dark:text-neutral-200 dark:peer-focus:text-primary"
-                        >
-                          First name
-                        </label>
-                      </div>
-                      <div class="relative mb-6" data-te-input-wrapper-init>
-                        <input
-                          type="text"
-                          class="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:text-black dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
-                          id="lastName"
-                          aria-describedby="emailHelp124"
-                          placeholder="Last name"
-                          onChange={(e) => {
-                            setLname(e.target.value);
-                          }}
-                        />
-                        <label
-                          for="lastName"
-                          class="pointer-events-none absolute left-3 top-0 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[1.6] text-neutral-500 transition-all duration-200 ease-out peer-focus:-translate-y-[0.9rem] peer-focus:scale-[0.8] peer-focus:text-primary peer-data-[te-input-state-active]:-translate-y-[0.9rem] peer-data-[te-input-state-active]:scale-[0.8] motion-reduce:transition-none dark:text-neutral-200 dark:peer-focus:text-primary"
-                        >
-                          Last name
-                        </label>
-                      </div>
+          
+          {/* Right column: Booking and payment */}
+          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+            {!showPayment ? (
+              <>
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-gray-600 font-medium">Starting From</p>
+                      <p className="text-3xl font-bold text-blue-600">
+                        NPR {allTours?.price || "0"}
+                        <span className="text-sm text-gray-500 font-normal">/person</span>
+                      </p>
                     </div>
-                    {/* date */}
-                    <div
-                      class="relative mb-3"
-                      id="datepicker-disable-past"
-                      data-te-input-wrapper-init
-                    >
-                      <input
-                        type="date"
-                        id="date"
-                        min={new Date().toISOString().split("T")[0]}
-                        class="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 peer-focus:text-primary data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:text-black dark:placeholder:text-neutral-200 dark:peer-focus:text-primary [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
-                        placeholder="Select a date"
-                        onChange={(e) => {
-                          setDate(e.target.value);
-                        }}
-                      />
-                      <label
-                        for="date"
-                        class="pointer-events-none absolute left-3 top-0 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[1.6] text-neutral-500 transition-all duration-200 ease-out peer-focus:-translate-y-[0.9rem] peer-focus:scale-[0.8] peer-focus:text-primary peer-data-[te-input-state-active]:-translate-y-[0.9rem] peer-data-[te-input-state-active]:scale-[0.8] motion-reduce:transition-none dark:text-neutral-200 dark:peer-focus:text-primary"
+                    <div className="flex items-center">
+                      <AiFillStar className="text-yellow-500 text-xl" />
+                      <span className="ml-1 font-medium">4.8</span>
+                      <span className="ml-1 text-gray-500 text-sm">(24 reviews)</span>
+                    </div>
+                  </div>
+                  
+                  <div className="border-t border-gray-200 pt-6">
+                    <h3 className="text-xl font-bold mb-4">Reserve Your Spot</h3>
+                    <form onSubmit={handleBookNow}>
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-gray-700 mb-1 text-sm font-medium">First Name</label>
+                          <input
+                            type="text"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={firstName}
+                            onChange={(e) => setFname(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-gray-700 mb-1 text-sm font-medium">Last Name</label>
+                          <input
+                            type="text"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={lastName}
+                            onChange={(e) => setLname(e.target.value)}
+                            required
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="mb-4">
+                        <label className="block text-gray-700 mb-1 text-sm font-medium">Tour Date</label>
+                        <input
+                          type="date"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          min={new Date().toISOString().split("T")[0]}
+                          value={date}
+                          onChange={(e) => setDate(e.target.value)}
+                          required
+                        />
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                          <label className="block text-gray-700 mb-1 text-sm font-medium">Phone Number</label>
+                          <input
+                            type="tel"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-gray-700 mb-1 text-sm font-medium">Number of Guests</label>
+                          <input
+                            type="number"
+                            min="1"
+                            max={allTours?.groupCount || 10}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={guestCount}
+                            onChange={(e) => setGuests(e.target.value)}
+                            required
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="mb-4 bg-blue-50 p-3 rounded-md">
+                        <p className="text-sm text-blue-700">
+                          By proceeding, you'll be redirected to a secure payment page after form submission.
+                        </p>
+                      </div>
+                      
+                      <button
+                        type="submit"
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors"
                       >
-                        Select a date
-                      </label>
-                    </div>
-
-                    {/* phone number */}
-                    <div class="grid grid-cols-2 gap-4">
-                      <div class="relative mb-6" data-te-input-wrapper-init>
-                        <input
-                          type="tel"
-                          class="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:text-black dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
-                          id="phone"
-                          placeholder="First name"
-                          onChange={(e) => {
-                            setPhone(e.target.value);
-                          }}
-                        />
-                        <label
-                          for="phone"
-                          class="pointer-events-none absolute left-3 top-0 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[1.6] text-neutral-500 transition-all duration-200 ease-out peer-focus:-translate-y-[0.9rem] peer-focus:scale-[0.8] peer-focus:text-primary peer-data-[te-input-state-active]:-translate-y-[0.9rem] peer-data-[te-input-state-active]:scale-[0.8] motion-reduce:transition-none dark:text-neutral-200 dark:peer-focus:text-primary"
-                        >
-                          Phone Number
-                        </label>
-                      </div>
-                      <div class="relative mb-6" data-te-input-wrapper-init>
-                        <input
-                          type="number"
-                          class="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:text-black dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
-                          id="countGuest"
-                          placeholder="Last name"
-                          onChange={(e) => {
-                            setGuests(e.target.value);
-                          }}
-                        />
-                        <label
-                          for="countGuest"
-                          class="pointer-events-none absolute left-3 top-0 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[1.6] text-neutral-500 transition-all duration-200 ease-out peer-focus:-translate-y-[0.9rem] peer-focus:scale-[0.8] peer-focus:text-primary peer-data-[te-input-state-active]:-translate-y-[0.9rem] peer-data-[te-input-state-active]:scale-[0.8] motion-reduce:transition-none dark:text-neutral-200 dark:peer-focus:text-primary"
-                        >
-                          No of Guests
-                        </label>
-                      </div>
-                    </div>
-                    <button
-                      type="submit"
-                      class="inline-block w-full rounded-xl bg-primary px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)]"
-                      data-te-ripple-init
-                      data-te-ripple-color="light"
-                      onClick={inputHandler}
-                    >
-                      Book Now
-                    </button>
-                  </form>
+                        Continue to Payment
+                      </button>
+                    </form>
+                  </div>
                 </div>
+              </>
+            ) : (
+              <div>
+                <h3 className="text-xl font-bold mb-4">Complete Your Booking</h3>
+                <TourKhaltiPayment 
+                  tourData={allTours} 
+                  bookingData={bookingData} 
+                  user={user} 
+                />
+                <button 
+                  onClick={() => setShowPayment(false)}
+                  className="mt-4 w-full py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                >
+                  Back to Booking Form
+                </button>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-2xl px-4 py-10 sm:px-4 sm:py-15 lg:max-w-7xl lg:px-8">
-        <h1 className="text-5xl  mb-11">Description</h1>
-        <p className="text-2xl">{allTours.description}</p>
+      {/* Description Section */}
+      <div className="mx-auto max-w-2xl px-4 py-8 sm:px-4 lg:max-w-7xl lg:px-8">
+        <h2 className="text-3xl font-bold mb-6">Description</h2>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <p className="text-gray-700 leading-relaxed">
+            {allTours?.description}
+          </p>
+        </div>
       </div>
-      <div className="mx-auto max-w-2xl px-4 py-10 sm:px-4 sm:py-15 lg:max-w-7xl lg:px-8">
-        <h1 className="text-5xl  mb-11">Introduction</h1>
-        <p className="text-2xl">{allTours.introduction}</p>
+
+      {/* Introduction Section */}
+      <div className="mx-auto max-w-2xl px-4 py-8 sm:px-4 lg:max-w-7xl lg:px-8">
+        <h2 className="text-3xl font-bold mb-6">Tour Overview</h2>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <p className="text-gray-700 leading-relaxed">
+            {allTours?.introduction}
+          </p>
+        </div>
       </div>
-      {/* stepper */}
-      <div className="mx-auto max-w-2xl px-4 py-10 sm:px-4 sm:py-15 lg:max-w-7xl lg:px-8">
-        <DaysShow />
+
+      {/* Daily Itinerary */}
+      <div className="mx-auto max-w-2xl px-4 py-8 sm:px-4 lg:max-w-7xl lg:px-8">
+        <h2 className="text-3xl font-bold mb-6">Daily Itinerary</h2>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <DaysShow />
+        </div>
       </div>
-      {/* inclustion exclution */}
-      <div className="mx-auto max-w-2xl px-4 py-10 sm:px-4 sm:py-15 lg:max-w-7xl lg:px-8">
-        <InclusionExclusion />
+
+      {/* Inclusions & Exclusions */}
+      <div className="mx-auto max-w-2xl px-4 py-8 sm:px-4 lg:max-w-7xl lg:px-8">
+        <h2 className="text-3xl font-bold mb-6">What's Included</h2>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <InclusionExclusion />
+        </div>
       </div>
     </div>
   );

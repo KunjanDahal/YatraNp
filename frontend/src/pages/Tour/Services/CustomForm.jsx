@@ -1,15 +1,6 @@
 import React, { useState, useContext } from "react";
-import { RiMapPin5Fill } from "react-icons/ri";
-import { IoPeopleSharp } from "react-icons/io5";
-import { HiUserGroup } from "react-icons/hi";
-import {
-  TbMap2,
-  TbSquareRoundedNumber1Filled,
-  TbSquareRoundedNumber2Filled,
-  TbSquareRoundedNumber3Filled,
-  TbSquareRoundedNumber4Filled,
-} from "react-icons/tb";
-import { BsFillTelephoneOutboundFill } from "react-icons/bs";
+import { FaMapMarkerAlt, FaCalendarAlt, FaPhoneAlt, FaUsers, FaPaperPlane } from "react-icons/fa";
+import { BsArrowRight, BsChatSquareText, BsCheckCircle } from "react-icons/bs";
 import Swal from "sweetalert2";
 import axios from "axios";
 import { AuthContext } from "../../../context/authContext";
@@ -17,13 +8,20 @@ import { AuthContext } from "../../../context/authContext";
 const CustomForm = () => {
   const [whereFrom, setFrom] = useState("");
   const [whereTo, setTo] = useState("");
-  const [days, setDays] = useState(0);
-
+  const [days, setDays] = useState("");
   const { user } = useContext(AuthContext);
-  console.log(user);
 
   const inputHandler = async (e) => {
     e.preventDefault();
+
+    if (!user) {
+      Swal.fire({
+        icon: "error",
+        title: "Login Required",
+        text: "Please log in to submit a custom tour request",
+      });
+      return;
+    }
 
     const currentUser = user.email;
 
@@ -44,179 +42,194 @@ const CustomForm = () => {
 
       try {
         const result = await Swal.fire({
-          title: "Do you want to save the changes?",
-          showDenyButton: true,
+          title: "Submit Custom Tour Request?",
+          text: "Our travel experts will contact you soon!",
+          icon: "question",
           showCancelButton: true,
-          confirmButtonText: "Save",
-          denyButtonText: `Don't save`,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes, Submit Request"
         });
 
         if (result.isConfirmed) {
-          console.log(newForm);
-          const response = await axios.post("/tours/customform", newForm);
-          Swal.fire(response.data.message, "", "success");
-        } else if (result.isDenied) {
-          Swal.fire("Details are not saved", "", "error");
+          const response = await axios.post("/api/tours/customform", newForm);
+          Swal.fire({
+            icon: "success",
+            title: "Request Submitted!",
+            text: response.data.message || "We'll contact you soon with personalized tour options.",
+            confirmButtonColor: "#3085d6",
+          });
+          
+          // Reset form after successful submission
+          setFrom("");
+          setTo("");
+          setDays("");
         }
       } catch (err) {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: err.message,
+          text: err.message || "Something went wrong. Please try again.",
         });
       }
     }
   };
+  
   return (
-    <div className="mx-auto max-w-2xl px-4 pb-16 sm:px-6 lg:max-w-7xl lg:px-8">
-      <div className="mt-6 grid grid-cols-1 gap-x-6   lg:grid-cols-2 xl:gap-x-8 ">
-        {/* how it works */}
-        <div className="bg-[#41BBFF]">
-          {/* upper-1 */}
-          <div>
-            <h1
-              className="text-center p-3 mt-5 text-5xl "
-              style={{ fontFamily: "popins" }}
-            >
-              How it Works{" "}
-            </h1>
-            <div className="p-8">
-              <div className="flex flex-row relative p-3 text-lg ">
-                <TbSquareRoundedNumber1Filled className="mr-10  text-white" />
-                <p>Tell us details of your holiday plan</p>
+    <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 bg-white rounded-xl shadow-xl overflow-hidden">
+        {/* How It Works Section - 2 columns */}
+        <div className="lg:col-span-2 bg-gradient-to-br from-blue-600 to-blue-400 text-white p-8">
+          <h2 className="text-2xl font-bold mb-8 border-b border-blue-300 pb-4 text-white">How It Works</h2>
+          
+          <div className="space-y-6">
+            <div className="flex items-start space-x-4">
+              <div className="flex-shrink-0 bg-white text-blue-600 rounded-full h-8 w-8 flex items-center justify-center">
+                1
               </div>
-              <div className="flex flex-row relative p-3 text-lg ">
-                <TbSquareRoundedNumber2Filled className="mr-10  text-white" />
-                <p>Connect with our expert agents</p>
+              <div>
+                <h3 className="font-semibold text-lg text-white">Share Your Travel Details</h3>
+                <p className="opacity-90">Tell us where you want to go and for how long</p>
               </div>
-              <div className="flex flex-row relative p-3 text-lg">
-                <TbSquareRoundedNumber3Filled className="mr-10  text-white" />
-                <p>Compare & customize further</p>
+            </div>
+            
+            <div className="flex items-start space-x-4">
+              <div className="flex-shrink-0 bg-white text-blue-600 rounded-full h-8 w-8 flex items-center justify-center">
+                2
               </div>
-              <div className="flex flex-row relative p-3 text-lg">
-                <TbSquareRoundedNumber4Filled className="mr-10  text-white" />
-                <p>Travel</p>
+              <div>
+                <h3 className="font-semibold text-lg text-white">Expert Consultation</h3>
+                <p className="opacity-90">Our travel specialists will contact you</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start space-x-4">
+              <div className="flex-shrink-0 bg-white text-blue-600 rounded-full h-8 w-8 flex items-center justify-center">
+                3
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg text-white">Customize Your Itinerary</h3>
+                <p className="opacity-90">Fine-tune your trip until it's perfect</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start space-x-4">
+              <div className="flex-shrink-0 bg-white text-blue-600 rounded-full h-8 w-8 flex items-center justify-center">
+                4
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg text-white">Enjoy Your Adventure</h3>
+                <p className="opacity-90">Experience Nepal with confidence</p>
               </div>
             </div>
           </div>
-          {/* mid */}
-          <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10  lg:grid-cols-2 xl:gap-x-8 ">
-            <div>
-              <p className="items-center text-2xl p-3 flex justify-center ">
-                <IoPeopleSharp />
-              </p>
-              <div className="text-center p-2 text-xl">
-                <p className="font-extrabold">200+ </p>
-                <p>Verified Agents</p>
+          
+          <div className="mt-12 pt-8 border-t border-blue-300">
+            <div className="grid grid-cols-2 gap-6 mb-8">
+              <div className="text-center">
+                <div className="flex justify-center mb-2">
+                  <FaUsers size={24} />
+                </div>
+                <p className="font-bold text-xl">200+</p>
+                <p className="text-sm">Verified Agents</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="flex justify-center mb-2">
+                  <BsCheckCircle size={24} />
+                </div>
+                <p className="font-bold text-xl">24/7</p>
+                <p className="text-sm">Availability</p>
               </div>
             </div>
-            <div>
-              <p className="items-center text-2xl p-3 flex justify-center text-black ">
-                <HiUserGroup />
-              </p>
-              <div className="text-center p-2 text-xl">
-                <p className="font-extrabold">24/7</p>
-                <p>Availablity</p>
+            
+            <div className="text-center">
+              <div className="flex items-center justify-center space-x-2 mb-2">
+                <FaPhoneAlt size={14} />
+                <span className="font-semibold">Call us for details</span>
               </div>
+              <p className="text-lg font-medium">0112224448 / 0112224449</p>
+              <p className="text-xs mt-2">200+ Agents | 5M+ Travelers | 80+ Destinations</p>
             </div>
-          </div>
-          <hr class="px-4 my-12 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50" />
-          {/* lower */}
-          <div className="text-center p-4 text-xl">
-            <div className="felx flex-row">
-              <BsFillTelephoneOutboundFill className="inline-flex" />
-              <p>Call us for details</p>
-            </div>
-            <p>0112224448/0112224449</p>
-            <p>200+ Agents | 5M+ Travelers| 80+ Destination</p>
           </div>
         </div>
-        {/* how it works end */}
-        {/* Customize form */}
-        <div className="shadow-2xl flex justify-center items-center">
-          <div>
-            <p className="items-center text-8xl p-3 flex justify-center text-blue-600">
-              <TbMap2 color="#41BBFF" />
-            </p>
-            <h2
-              className="text-center text-3xl "
-              style={{ fontFamily: "popins" }}
-            >
-              Where Do You Want to Go?
-            </h2>
-            <form action="" className="px-4 ">
-              <div>
-                <div>
-                  <h6 className="mb-1">From Where</h6>
-                  <div class="relative mb-3" data-te-input-wrapper-init>
-                    <RiMapPin5Fill className="icon" />
-                    <input
-                      type="text"
-                      class=" min-h-[auto] w-full rounded-lg  input border-4 divide-cyan-400"
-                      id="exampleFormControlInputText"
-                      onChange={(e) => {
-                        setFrom(e.target.value);
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div>
-                <div>
-                  <h6 className="mb-1">To Where</h6>
-                  <div class="relative mb-3" data-te-input-wrapper-init>
-                    <RiMapPin5Fill className="icon" />
-                    <input
-                      type="text"
-                      class=" min-h-[auto] w-full rounded-lg  input border-4 dborder-cyan-500"
-                      id="exampleFormControlInputText"
-                      onChange={(e) => {
-                        setTo(e.target.value);
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <div>
-                      <h6 className="mb-5 text-center">Duration (Days)</h6>
-                      <div class="relative mb-3" data-te-input-wrapper-init>
-                        <div class="flex justify-center">
-                          <div class="mb-[0.125rem] mr-4 inline-block min-h-[1.5rem] pl-[1.5rem]">
-                            <input
-                              class="min-h-auto w-full rounded-lg  input border-2 border-solid border-neutral-300 before:pointer-events-none before:absolute before:h-4 before:w-4 before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] after:absolute after:z-[1] after:block after:h-4 after:w-4 after:rounded-full after:content-[''] focus:shadow-none focus:outline-none focus:ring-0 focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:before:transition-[box-shadow_0.2s,transform_0.2s] dark:border-neutral-600 dark:focus:before:shadow-[0px_0px_0px_13px_rgba(255,255,255,0.4)]"
-                              type="text"
-                              name="days"
-                              id="days"
-                              onChange={(e) => {
-                                setDays(e.target.value);
-                              }}
-                            />
-                            <label
-                              class="mt-px inline-block pl-[0.15rem] hover:cursor-pointer"
-                              for="days"
-                            >
-                            </label>
-                          </div>
-                        </div>
-                        <div className="flex flex-col justify-center mt-5">
-                          <button
-                            type="submit"
-                            data-te-ripple-init
-                            data-te-ripple-color="light"
-                            class="inline-block rounded bg-primary px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]"
-                            onClick={inputHandler}
-                          >
-                            Submit
-                          </button>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </form>
+        
+        {/* Custom Tour Form - 3 columns */}
+        <div className="lg:col-span-3 p-8">
+          <div className="flex items-center mb-8">
+            <div className="bg-blue-100 rounded-full p-3 mr-4">
+              <BsChatSquareText className="text-blue-600 text-2xl" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800">Request Your Custom Tour</h2>
           </div>
-          <div></div>
+          
+          <form className="space-y-6" onSubmit={inputHandler}>
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">Starting Point</label>
+              <div className="relative rounded-lg shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaMapMarkerAlt className="text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Where are you traveling from?"
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  value={whereFrom}
+                  onChange={(e) => setFrom(e.target.value)}
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">Destination</label>
+              <div className="relative rounded-lg shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaMapMarkerAlt className="text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Where in Nepal do you want to visit?"
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  value={whereTo}
+                  onChange={(e) => setTo(e.target.value)}
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">Trip Duration (Days)</label>
+              <div className="relative rounded-lg shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaCalendarAlt className="text-gray-400" />
+                </div>
+                <input
+                  type="number"
+                  min="1"
+                  max="30"
+                  placeholder="How many days will you be traveling?"
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  value={days}
+                  onChange={(e) => setDays(e.target.value)}
+                />
+              </div>
+            </div>
+            
+            <div className="pt-4">
+              <button
+                type="submit"
+                className="w-full flex items-center justify-center space-x-2 px-6 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-300"
+              >
+                <FaPaperPlane />
+                <span>Send Request</span>
+                <BsArrowRight className="ml-2" />
+              </button>
+              
+              <p className="text-center text-sm text-gray-500 mt-4">
+                Our travel experts will get back to you within 24 hours
+              </p>
+            </div>
+          </form>
         </div>
       </div>
     </div>

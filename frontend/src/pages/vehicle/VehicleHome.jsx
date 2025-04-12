@@ -16,6 +16,25 @@ const VehicleHome = () => {
   // Use either the search results or the fetched data
   const vehicles = searchData || data;
 
+  // Debug logs
+  console.log("VehicleHome - data from API:", data);
+  console.log("VehicleHome - searchData:", searchData);
+  console.log("VehicleHome - vehicles to display:", vehicles);
+  
+  // Check each vehicle record individually
+  if (vehicles && vehicles.length > 0) {
+    vehicles.forEach((vehicle, index) => {
+      console.log(`Vehicle ${index + 1}:`, {
+        id: vehicle._id,
+        brand: vehicle.brand,
+        model: vehicle.model,
+        vehicleMainImg: vehicle.vehicleMainImg,
+        price: vehicle.price,
+        allProps: Object.keys(vehicle)
+      });
+    });
+  }
+
   if (loading) return <div className="text-center py-10">Loading...</div>;
   if (error) return <div className="text-center py-10 text-red-500">Error: {error}</div>;
 

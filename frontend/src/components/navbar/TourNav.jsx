@@ -2,36 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Menu } from "@headlessui/react";
 
-const nav_links = [
-  {
-    path: "/tours/home",
-    display: "Explore Nepal",
-  },
-  {
-    path: "/sunandbeach",
-    display: "Sun and Beach",
-  },
-  {
-    path: "/hikingandtrekking",
-    display: "Hiking and Trekking",
-  },
-  {
-    path: "/wildsafari",
-    display: "Wild Safari",
-  },
-  {
-    path: "/cultural",
-    display: "Cultural",
-  },
-  {
-    path: "/special",
-    display: "Special Tours",
-  },
-  {
-    path: "/festival",
-    display: "Festivals",
-  },
-];
 
 const TourNav = () => {
   return (
@@ -68,18 +38,7 @@ const TourNav = () => {
             <Menu as="div" className="relative inline-block text-left">
               <div>
                 <Menu.Button className="inline-flex space-x-8  w-full justify-center rounded-md px-3 py-2">
-                  {nav_links.map((item, index) => (
-                    <Menu>
-                      {
-                        <Link
-                          className=" hover:bg-[#41A4FF] hover:text-white px-3 py-5 rounded-lg"
-                          to={item.path}
-                        >
-                          {item.display}
-                        </Link>
-                      }
-                    </Menu>
-                  ))}
+                  
                 </Menu.Button>
               </div>
             </Menu>

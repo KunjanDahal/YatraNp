@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 // Configure axios defaults
-axios.defaults.baseURL = "http://localhost:5000";
+axios.defaults.baseURL = "http://localhost:5000/api";
 
 const useFetch = (url) => {
   const [data, setData] = useState([]);

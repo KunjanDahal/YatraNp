@@ -17,7 +17,7 @@ const HadminView = () => {
 
   useEffect(() => {
     axios
-      .get(`/hotels/find/${id}`)
+      .get(`/api/hotels/find/${id}`)
       .then((response) => {
         setData(response.data);
         console.log(data.HotelImg);
@@ -39,7 +39,7 @@ const HadminView = () => {
       }).then((result) => {
         if (result.isConfirmed) {
           axios
-            .delete(`/hotels/${state._id}`)
+            .delete(`/api/hotels/${state._id}`)
             .then((res) => {
               Swal.fire("Deleted!", res.data.status, "success");
                 navigate("/hotels");
@@ -47,8 +47,9 @@ const HadminView = () => {
             .catch((err) => {
               Swal.fire("Not Deleted!", err.message, "error");
             });
-        }
-          })}
+        }
+      });
+  };
   
 
   

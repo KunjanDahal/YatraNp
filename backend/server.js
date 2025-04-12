@@ -17,7 +17,7 @@ const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/authRoutes");
 const activityRoutes = require("./routes/activityRoute");
 const paymentRoutes = require("./routes/paymentRoutes");
-const khaltiRoutes = require("./routes/khaltiRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 // Initialize Express app
 const app = express();
@@ -28,15 +28,17 @@ createImagesDirectory();
 // Database Connection
 connectDB();
 
-// Middleware to parse JSON and URL-encoded data
-app.use(express.json({ limit: "50mb", extended: true }));
-app.use(express.urlencoded({ limit: "50mb", extended: true }));
-
 // Middleware for handling CORS
 app.use(cors({
   origin: ["http://localhost:30000", "http://localhost:3000"],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
+
+// Middleware to parse JSON and URL-encoded data
+app.use(express.json({ limit: "50mb", extended: true }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Middleware for parsing cookies
 app.use(cookieParser());
@@ -59,6 +61,7 @@ app.use(passport.session());
 // Static file serving for images
 app.use("/api/vehicle/images", express.static(path.join(__dirname, "images")));
 app.use("/api/hotels/images", express.static(path.join(__dirname, "images")));
+app.use("/api/tours/images", express.static(path.join(__dirname, "images")));
 app.use("/images", express.static(path.join(__dirname, "images")));
 
 
@@ -67,7 +70,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/activities", activityRoutes);
 app.use("/api/payments", paymentRoutes);
-app.use("/api/khalti", khaltiRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 //tour
 const tourRouter = require("./routes/tourRouter");
@@ -90,6 +93,30 @@ app.get("/", (req, res) => {
   res.send("API is Running Successfully");
 });
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Global error handler:', err.stack);
+  res.status(500).json({
+    success: false,
+    message: 'Something went wrong!',
+    error: process.env.NODE_ENV === 'production' ? 'Internal Server Error' : err.message
+  });
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err) => {
+  console.error('UNHANDLED REJECTION! 💥 Shutting down...');
+  console.error(err.name, err.message, err.stack);
+  // Don't crash the server, just log the error
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION! 💥');
+  console.error(err.name, err.message, err.stack);
+  // Don't crash the server, just log the error
+});
+
 // Define Port and Start Server
 const port = process.env.PORT || 5000;
 const server = app.listen(port, () =>
@@ -104,7 +131,23 @@ const io = require("socket.io")(server, {
   },
 });
 
+// Store the io instance in the app for use in controllers
+app.set('io', io);
+
 io.on("connection", (socket) => {
-  console.log("Connected to socket.io".cyan.bold);
+  console.log("User connected to socket.io".cyan.bold);
+
+  // Join a room with the user's email
+  socket.on("join", (userEmail) => {
+    if (userEmail) {
+      console.log(`User joined room: ${userEmail}`.cyan);
+      socket.join(userEmail);
+    }
+  });
+
+  // Handle disconnect
+  socket.on("disconnect", () => {
+    console.log("User disconnected from socket.io".yellow);
+  });
 });
 

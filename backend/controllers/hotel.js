@@ -162,17 +162,20 @@ const countByType =async (req,res,next)=>{
 
 const getHotelbyCity = async(req, res) => {
     const city = req.params.city;
-    console.log(city);
-  try{
-      const hotels = await Hotel.find({city:city}); 
-      if(!hotels){
-          res.status(404).send("No hotels found");
-      }
-      console.log(hotels);
-      res.send(hotels);
-  }catch(err){
-      res.status(500).send(err.message);
-  }
+    console.log("Searching for city:", city);
+    try {
+        const hotels = await Hotel.find({
+            city: { $regex: new RegExp('^' + city + '$', 'i') }
+        });
+        if (hotels.length === 0) {
+            return res.status(404).json({ message: "No hotels found in this city" });
+        }
+        console.log("Found hotels:", hotels);
+        res.json(hotels);
+    } catch(err) {
+        console.error("Error finding hotels:", err);
+        res.status(500).json({ message: err.message });
+    }
 }
 
  const getHotelRooms = async(req,res,next)=>{

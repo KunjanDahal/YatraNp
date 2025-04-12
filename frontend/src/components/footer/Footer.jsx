@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import {
   FaWhatsappSquare,
   FaFacebookSquare,
@@ -24,18 +25,18 @@ const Footer = () => {
         <div>
           <h6 className="font-bold text-[#41a3ff]">Reservations</h6>
           <ul className="mt-2 font-light">
-            <li className="py-2 text-sm">Hotels</li>
-            <li className="py-2 text-sm">Tour Packages</li>
-            <li className="py-2 text-sm">Vehicles</li>
-            <li className="py-2 text-sm">Restaurants</li>
-            <li className="py-2 text-sm">Events</li>
+            <li className="py-2 text-sm"><Link to="/hotelhome">Hotels</Link></li>
+            <li className="py-2 text-sm"><Link to="/tours/home">Tour Packages</Link></li>
+            <li className="py-2 text-sm"><Link to="/vehicles">Vehicles</Link></li>
+            <li className="py-2 text-sm"><Link to="/restaurants">Restaurants</Link></li>
+            <li className="py-2 text-sm"><Link to="/events">Events</Link></li>
           </ul>
         </div>
         <div className="ml-[8rem]">
           <h6 className="font-bold text-[#41A4FF]">Support</h6>
           <ul className="mt-2 font-light">
-            <li className="py-2 text-sm">Contact us</li>
-            <li className="py-2 text-sm">About us</li>
+            <li className="py-2 text-sm"><Link to="/contactus">Contact us</Link></li>
+            <li className="py-2 text-sm"><Link to="/about">About us</Link></li>
           </ul>
         </div>
       </div>

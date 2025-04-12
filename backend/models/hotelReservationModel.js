@@ -24,10 +24,28 @@ const hotelReservationModel=new mongoose.Schema({
     totalDays:{
         type:Number,
         reqiured:true
+    },
+    // Payment related fields
+    paymentStatus: {
+        type: String,
+        enum: ['pending', 'completed', 'failed', 'refunded'],
+        default: 'pending'
+    },
+    paymentMethod: {
+        type: String,
+        default: 'Khalti'
+    },
+    purchaseOrderId: {
+        type: String
+    },
+    transactionId: {
+        type: String
+    },
+    rooms: {
+        type: Array,
+        default: []
     }
     
-    
-   
 },{timestamps :true}) 
 
 module.exports =  mongoose.model("hotelReservation",hotelReservationModel)  

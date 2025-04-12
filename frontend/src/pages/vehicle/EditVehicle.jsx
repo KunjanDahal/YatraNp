@@ -27,7 +27,7 @@ const EditVehicle = () => {
         const updateVehicle = {price, location, description}
 
       axios
-      .patch(`/vehicle/${state._id}`, updateVehicle ) 
+      .patch(`/api/vehicle/${state._id}`, updateVehicle ) 
       .then(() => {
         Swal.fire({
           
@@ -36,7 +36,7 @@ const EditVehicle = () => {
           showConfirmButton: false,
           timer: 2000
         }) 
-        navigate('/vehicle')
+        navigate('/vehicles/admin')
 
       })
       .catch((err) => {

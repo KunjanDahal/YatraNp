@@ -1,4 +1,3 @@
-
 import axios from "axios";
 import Swal from 'sweetalert2'
 import React, { useState, useEffect } from "react";
@@ -19,7 +18,7 @@ const VehicleBook = () => {
 
   useEffect(() => {
     axios
-      .get(`/vehicle/${state._id}`)
+      .get(`/api/vehicle/${state._id}`)
       .then((response) => {
         setData(response.data);
         console.log(data.vehicleMainImg);
@@ -31,7 +30,7 @@ const VehicleBook = () => {
 
   const deleteHandler = () => {
     axios
-      .delete(`/vehicle/${state._id}`)
+      .delete(`/api/vehicle/${state._id}`)
       .then(() => {
         Swal.fire({
           
@@ -40,7 +39,7 @@ const VehicleBook = () => {
           showConfirmButton: false,
           timer: 2000,
           
-        }); navigate('/vehicle')
+        }); navigate('/vehicles/admin')
       })
       .catch((err) => {
         Swal.fire({

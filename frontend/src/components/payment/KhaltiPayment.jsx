@@ -14,22 +14,21 @@ const KhaltiPayment = ({
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
-  const { loading, error, paymentUrl, initiatePayment } = useKhaltiPayment();
+  const { isLoading: loading, initiationError: error, pidx, initiate } = useKhaltiPayment();
 
   useEffect(() => {
-    // Only redirect if paymentUrl exists and we haven't redirected yet
-    if (paymentUrl && !window.location.href.includes(paymentUrl)) {
-      console.log('Redirecting to payment URL:', paymentUrl);
-      window.location.href = paymentUrl;
+    // If we have a pidx, the payment has been initiated
+    if (pidx) {
+      console.log('Payment initiated with pidx:', pidx);
     }
-  }, [paymentUrl]);
+  }, [pidx]);
 
   useEffect(() => {
     if (error) {
       Swal.fire({
         icon: 'error',
         title: 'Payment Error',
-        text: error,
+        text: error.message || 'An error occurred during payment',
       });
       if (onError) onError(error);
     }
@@ -62,7 +61,7 @@ const KhaltiPayment = ({
         }]
       };
 
-      await initiatePayment(paymentInfo);
+      await initiate(paymentInfo);
       
     } catch (err) {
       console.error("Payment initiation failed:", err);

@@ -166,7 +166,7 @@ const Admin = () => {
 
               {/* Vehicle Management Card */}
               <Link
-                to="/vehicle"
+                to="/vehicles/admin"
                 className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 group"
               >
                 <div className="flex items-center space-x-4">
@@ -212,37 +212,8 @@ const Admin = () => {
                 </div>
               </Link>
 
-              {/* Reservation Management Card */}
-              <Link
-                to=""
-                className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 group"
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="bg-pink-100 p-3 rounded-full group-hover:bg-pink-500 transition-colors duration-300">
-                    <FaBookmark className="text-pink-500 text-2xl group-hover:text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 group-hover:text-pink-500">Reservation Management</h3>
-                    <p className="text-gray-600">Manage reservations</p>
-                  </div>
-                </div>
-              </Link>
-
-              {/* Other Card */}
-              <Link
-                to=""
-                className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 group"
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="bg-gray-100 p-3 rounded-full group-hover:bg-gray-500 transition-colors duration-300">
-                    <FaCog className="text-gray-500 text-2xl group-hover:text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 group-hover:text-gray-500">Other</h3>
-                    <p className="text-gray-600">Additional settings</p>
-                  </div>
-                </div>
-              </Link>
+             
+                
             </div>
 
             {/* Analytics Section */}

@@ -6,7 +6,10 @@ const addTourForm = new Schema({
     type: String,
     required: [true, "Must be login first"],
   },
-
+  img: {
+    type: String,
+    required: [true, "Tour image is required"],
+  },
   name: {
     type: String,
     required: [true, "must provide a name "],
@@ -45,5 +48,5 @@ const addTourForm = new Schema({
   },
 });
 
-const tourDetails = mongoose.model("Tour Details", addTourForm);
+const tourDetails = mongoose.model("tour_details", addTourForm);
 module.exports = tourDetails;

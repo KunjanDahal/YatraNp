@@ -9,7 +9,6 @@
     "@fortawesome/fontawesome-free": "^6.4.0",
     "@headlessui/react": "^1.7.14",
     "@heroicons/react": "^2.0.17",
-    "@material-tailwind/html": "^2.0.0",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.12.0",
     "@mui/x-data-grid": "^6.1.0",
@@ -38,12 +37,12 @@
     "react-scripts": "^5.0.1",
     "recharts": "^2.6.2",
     "sass": "^1.62.0",
+    "socket.io-client": "^4.7.2",
     "sweetalert2": "^11.4.8",
-    "tw-elements": "^1.0.0-beta2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts --openssl-legacy-provider start",
+    "start": "set PORT=30000 && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

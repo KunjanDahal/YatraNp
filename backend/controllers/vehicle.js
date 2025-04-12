@@ -32,22 +32,40 @@ const createVehicle = async (req, res) => {
     try {
         upload(req, res, async (err) => {
             if (err) {
+                console.error("Upload error:", err);
                 return res.status(500).json({ message: err.message });
             }
 
-            const vehicleData = {
-                ...req.body,
-                vehicleMainImg: req.files.vehicleMainImg[0].filename,
-                vehicleImgs: req.files.vehicleImgs.map(file => file.filename),
-                insuranceImgs: req.files.insuranceImgs.map(file => file.filename)
-            };
+            try {
+                const vehicleData = {
+                    ...req.body,
+                    vehicleMainImg: req.files.vehicleMainImg[0].filename,
+                    vehicleImgs: req.files.vehicleImgs.map(file => file.filename),
+                    insuranceImgs: req.files.insuranceImgs.map(file => file.filename)
+                };
 
-            const newVehicle = new Vehicle(vehicleData);
-            await newVehicle.save();
-            res.status(200).json(newVehicle);
+                console.log("Creating new vehicle:", vehicleData.vehicleNumber);
+                const newVehicle = new Vehicle(vehicleData);
+                await newVehicle.save();
+                console.log("Vehicle created successfully:", newVehicle._id);
+                return res.status(200).json(newVehicle);
+            } catch (saveErr) {
+                // Check for duplicate key error
+                if (saveErr.code === 11000) {
+                    console.error("Duplicate vehicle number:", saveErr);
+                    return res.status(400).json({ 
+                        message: "Vehicle with this number already exists", 
+                        field: "vehicleNumber",
+                        error: saveErr.message 
+                    });
+                }
+                console.error("Error saving vehicle:", saveErr);
+                return res.status(500).json({ message: saveErr.message });
+            }
         });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.error("Unexpected error:", err);
+        return res.status(500).json({ message: err.message });
     }
 };
 
@@ -78,20 +96,32 @@ const deleteVehicle = async (req, res) => {
 // Get vehicle by ID
 const getVehicle = async (req, res) => {
     try {
+        console.log(`Fetching vehicle with ID: ${req.params.id}`);
         const vehicle = await Vehicle.findById(req.params.id);
-        res.status(200).json(vehicle);
+        
+        if (!vehicle) {
+            console.log(`Vehicle with ID ${req.params.id} not found`);
+            return res.status(404).json({ message: "Vehicle not found" });
+        }
+        
+        console.log("Vehicle found:", vehicle._id);
+        return res.status(200).json(vehicle);
     } catch (err) {
-        res.status(500).json(err);
+        console.error(`Error fetching vehicle ${req.params.id}:`, err);
+        return res.status(500).json({ message: "Failed to fetch vehicle", error: err.message });
     }
 };
 
 // Get all vehicles
 const getAllVehicles = async (req, res) => {
     try {
+        console.log("Fetching all vehicles");
         const vehicles = await Vehicle.find();
-        res.status(200).json(vehicles);
+        console.log(`Found ${vehicles.length} vehicles`);
+        return res.status(200).json(vehicles);
     } catch (err) {
-        res.status(500).json(err);
+        console.error("Error fetching vehicles:", err);
+        return res.status(500).json({ message: "Failed to fetch vehicles", error: err.message });
     }
 };
 
@@ -99,10 +129,13 @@ const getAllVehicles = async (req, res) => {
 const getVehiclesByLocation = async (req, res) => {
     const location = req.params.location;
     try {
+        console.log(`Searching for vehicles in location: ${location}`);
         const vehicles = await Vehicle.find({ location: location });
-        res.status(200).json(vehicles);
+        console.log(`Found ${vehicles.length} vehicles in ${location}`);
+        return res.status(200).json(vehicles);
     } catch (err) {
-        res.status(500).json(err);
+        console.error(`Error finding vehicles in ${location}:`, err);
+        return res.status(500).json({ message: "Failed to fetch vehicles by location", error: err.message });
     }
 };
 

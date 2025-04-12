@@ -1,15 +1,18 @@
-import React from "react";
+import React, { useContext } from "react";
 import Datatable from "../components/datatable/Datatable";
 import useFetch from "../hooks/useFetch";
 import { Link, useLocation } from "react-router-dom";
 import jspdf from "jspdf";
 import "jspdf-autotable";
 import moment from "moment";
+import { AuthContext } from "../context/authContext";
 
 const Vehiclelist = ({ columns }) => {
   const location = useLocation();
   const path = location.pathname.split("/")[1];
-  const { data } = useFetch(`/api/${path}`);
+  const { data } = useFetch(`/api/vehicle`);
+  const { user } = useContext(AuthContext);
+  const isAdmin = user && user.isAdmin;
 
   function generatePDF(tickets) {
     const doc = new jspdf();
@@ -54,32 +57,36 @@ const Vehiclelist = ({ columns }) => {
   return (
     <>
       <div className="flex flex-row col-span-2 lg:px-32 px-8 pt-7 pb-2 justify-between md:items-center ">
-        <div className="text-3xl font-bold">Vehicle Managment</div>
-        <div className="grid md:grid-cols-2 gap-1">
+        <div className="text-3xl font-bold">Vehicle Management</div>
+        {isAdmin && (
+          <div className="grid md:grid-cols-2 gap-1">
+            <Link
+              to="/vehicle/add"
+              className="bg-blue-500 hover:bg-blue-700 text-center text-white font-bold py-2 px-4 rounded cursor-pointer lg:mt-0 mt-3"
+            >
+              Add Vehicle
+            </Link>
+            <Link
+              onClick={() => {
+                generatePDF(data);
+              }}
+              className="bg-gray-800 hover:bg-gray-600 text-center text-white font-bold py-2 px-4 rounded cursor-pointer lg:mt-0 mt-3"
+            >
+              Generate report
+            </Link>
+          </div>
+        )}
+      </div>
+      {isAdmin && (
+        <div className="lg:px-32 px-8 flex md:justify-end">
           <Link
-            to="/vehicle/add"
+            to="/vehiclereservation"
             className="bg-blue-500 hover:bg-blue-700 text-center text-white font-bold py-2 px-4 rounded cursor-pointer lg:mt-0 mt-3"
           >
-            Add Vehicle
-          </Link>
-          <Link
-            onClick={() => {
-              generatePDF(data);
-            }}
-            className="bg-gray-800 hover:bg-gray-600 text-center text-white font-bold py-2 px-4 rounded cursor-pointer lg:mt-0 mt-3"
-          >
-            Generate report
+            Vehicle Reservations
           </Link>
         </div>
-      </div>
-      <div className="lg:px-32 px-8 flex md:justify-end">
-        <Link
-          to="/vehiclereservation"
-          className="bg-blue-500 hover:bg-blue-700 text-center text-white font-bold py-2 px-4 rounded cursor-pointer lg:mt-0 mt-3"
-        >
-          Vehicle Reservations
-        </Link>
-      </div>
+      )}
       <div>
         <Datatable columns={columns} />
       </div>

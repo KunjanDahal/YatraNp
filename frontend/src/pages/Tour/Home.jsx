@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import HeroTour from "./HeroTour";
 import HiddenPlaces from "./HiddenPlaces";
@@ -8,22 +9,42 @@ import TourCategories from "./Services/ServiceCategories";
 import TourNav from "../../components/navbar/TourNav";
 import { Link } from "react-router-dom";
 import { AiOutlineRight } from "react-icons/ai";
+import { FaMapMarkerAlt, FaCalendarAlt, FaPhoneAlt, FaUsers } from "react-icons/fa";
+import { MdSupportAgent, MdCompareArrows, MdDirectionsWalk } from "react-icons/md";
 import CustomForm from "./Services/CustomForm";
 
 import welcome from "../../assets/Tour/Tour-Welcome.jpg";
 
 const Home = () => {
+  const navigate = useNavigate();
+  const [fromWhere, setFromWhere] = useState("");
+  const [toWhere, setToWhere] = useState("");
+  const [duration, setDuration] = useState("");
+
+  // Handle travel planner form submission
+  const handleTravelPlanSubmit = (e) => {
+    e.preventDefault();
+    
+    if (!toWhere) {
+      alert("Please enter a destination");
+      return;
+    }
+    
+    // Navigate to search results with the form data
+    navigate(`/tours/search/${toWhere}/${duration || "0"}/0`);
+  };
+
   return (
     <div>
       <HeroTour />
 
       {/* Navigated menu start*/}
-      <nav class="bg-grey-light w-full rounded-md pl-20 pt-10">
-        <ol class="list-reset flex">
+      <nav className="bg-grey-light w-full rounded-md pl-20 pt-10">
+        <ol className="list-reset flex">
           <li>
             <Link
               to={"/"}
-              class="text-primary transition duration-150 ease-in-out hover:text-primary-600 focus:text-primary-600 active:text-primary-700 dark:text-primary-400 dark:hover:text-primary-500 dark:focus:text-primary-500 dark:active:text-primary-600"
+              className="text-primary transition duration-150 ease-in-out hover:text-primary-600 focus:text-primary-600 active:text-primary-700 dark:text-primary-400 dark:hover:text-primary-500 dark:focus:text-primary-500 dark:active:text-primary-600"
             >
               Home
             </Link>
@@ -34,7 +55,7 @@ const Home = () => {
           <li>
             <Link
               to={"#"}
-              class="text-primary transition duration-150 ease-in-out hover:text-primary-600 focus:text-primary-600 active:text-primary-700 dark:text-primary-400 dark:hover:text-primary-500 dark:focus:text-primary-500 dark:active:text-primary-600"
+              className="text-primary transition duration-150 ease-in-out hover:text-primary-600 focus:text-primary-600 active:text-primary-700 dark:text-primary-400 dark:hover:text-primary-500 dark:focus:text-primary-500 dark:active:text-primary-600"
             >
               Tour Packages
             </Link>
@@ -42,14 +63,14 @@ const Home = () => {
           <li>
             <AiOutlineRight className="mt-1 mx-2" />
           </li>
-          <li class="text-neutral-500 dark:text-neutral-400">
+          <li className="text-neutral-500 dark:text-neutral-400">
             Explore Nepal
           </li>
         </ol>
       </nav>
       {/* Navigated menu end*/}
 
-      {/* Navigation Tour bar */}
+     
 
       {/* Categories */}
       <div className="mx-auto max-w-2xl px-4  sm:px-6  lg:max-w-7xl lg:px-8">

@@ -1,15 +1,18 @@
 import { DataGrid } from "@mui/x-data-grid";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useContext } from "react";
 import useFetch from "../../hooks/useFetch";
 import axios from "axios";
 import "./datatable.scss";
 import Swal from "sweetalert2";
 import CircularProgress from "@mui/material/CircularProgress";
+import { AuthContext } from "../../context/authContext";
 
 const Datatable = ({ columns }) => {
   const location = useLocation();
   const path = location.pathname.split("/")[1];
+  const { user } = useContext(AuthContext);
+  const isAdmin = user && user.isAdmin;
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -18,7 +21,9 @@ const Datatable = ({ columns }) => {
   const [list, setList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data } = useFetch(`/api/${path}`);
+  // Use correct API endpoint based on path
+  const apiPath = path === "vehicles" ? "vehicle" : path;
+  const { data } = useFetch(`/api/${apiPath}`);
 
   const navigate = useNavigate();
 
@@ -40,7 +45,7 @@ const Datatable = ({ columns }) => {
     if (confirmResult.isConfirmed) {
       try {
         setIsLoading(true);
-        await axios.delete(`/api/${path}/${id}`);
+        await axios.delete(`/api/${apiPath}/${id}`);
         setIsLoading(false);
       } catch (error) {
         console.log(error);
@@ -60,9 +65,13 @@ const Datatable = ({ columns }) => {
         const hoteldata = await axios.get(`/api/${path}/find/${id}`);
         navigate("/hoteladmin", { state: hoteldata.data });
       }
-      if (path === "vehicle") {
-        const vehicledata = await axios.get(`/api/${path}/${id}`);
-        navigate("/vehicle/view/", { state: vehicledata.data });
+      if (path === "vehicles" || path === "vehicle") {
+        const vehicledata = await axios.get(`/api/vehicle/${id}`);
+        if (isAdmin) {
+          navigate("/vehicle/view/", { state: vehicledata.data });
+        } else {
+          navigate("/vehicle/book/" + id);
+        }
       }
       //path tour
       if (path === "tours") {
@@ -86,15 +95,17 @@ const Datatable = ({ columns }) => {
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded cursor-pointer"
               onClick={() => handleview(params.row._id)}
             >
-              View
+              {isAdmin ? "View" : "Book"}
             </div>
 
-            <div
-              onClick={() => handleDelete(params.row._id)}
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-4 rounded cursor-pointer"
-            >
-              Delete
-            </div>
+            {isAdmin && (
+              <div
+                onClick={() => handleDelete(params.row._id)}
+                className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-4 rounded cursor-pointer"
+              >
+                Delete
+              </div>
+            )}
           </div>
         );
       },

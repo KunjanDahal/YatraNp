@@ -1,15 +1,11 @@
 import { TbPhotoPlus } from "react-icons/tb";
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { Ripple, initTE } from "tw-elements";
 import Swal from "sweetalert2";
 import axios from "axios";
 import { AuthContext } from "../../../context/authContext";
 
 const AddTourPackage = () => {
-  useEffect(() => {
-    initTE({ Ripple });
-  }, []);
   const navigate = useNavigate();
 
   //store database states
@@ -29,6 +25,7 @@ const AddTourPackage = () => {
   //send data to database
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Form submission started");
 
     if (
       file === "" ||
@@ -59,40 +56,44 @@ const AddTourPackage = () => {
       });
 
       if (result.isConfirmed) {
-        const data = new FormData();
-        data.append("file", file);
-        data.append("upload_preset", "upload");
-        const uploadRes = await axios.post(
-          "https://api.cloudinary.com/v1_1/dpgelkpd4/image/upload",
-          data
-        );
+        console.log("Creating form data with:", { name, category, price, groupCount });
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("currentUser", currentUser);
+        formData.append("name", name);
+        formData.append("category", category);
+        formData.append("price", price);
+        formData.append("groupCount", groupCount);
+        formData.append("languages", languages);
+        formData.append("duration", duration);
+        formData.append("cities", cities);
+        formData.append("description", description);
+        formData.append("introduction", introduction);
 
-        const { url } = uploadRes.data;
-
-        const response = await axios.post("/tours", {
-          currentUser,
-          img: url,
-          name,
-          category,
-          price,
-          groupCount,
-          languages,
-          duration,
-          cities,
-          description,
-          introduction,
+        console.log("Sending request to /api/tours");
+        const response = await axios.post("/api/tours", formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          },
+          withCredentials: true
         });
-        Swal.fire(response.data.message, "", "success");
-        navigate("/tours");
+        console.log("Response received:", response.data);
+        
+        if (response.data.status === "Success") {
+          Swal.fire(response.data.message, "", "success");
+          navigate("/tours");
+        } else {
+          throw new Error(response.data.message || "Failed to add tour");
+        }
       } else {
         Swal.fire("Tour adding Cancelled!", "", "error");
       }
     } catch (err) {
-      // using err instead of error
+      console.error("Error submitting tour:", err);
       Swal.fire({
         icon: "error",
         title: "Oops...",
-        text: err.message,
+        text: err.message || "Failed to add tour",
       });
     }
   };
